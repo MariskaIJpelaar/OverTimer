@@ -13,4 +13,10 @@
         android:theme="?attr/actionBarTheme"
         tools:layout_editor_absoluteX="1dp"
         tools:layout_editor_absoluteY="1dp" />
+
+    <ListView
+        android:layout_width="409dp"
+        android:layout_height="672dp"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="58dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
