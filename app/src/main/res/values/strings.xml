@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">OverTimer</string>
+    <string name="welcome">Welcome!</string>
+    <string name="hours_worked">Hours worked</string>
+    <string name="overtime">Overtime</string>
+    <string name="register_hours">Register Hours</string>
 </resources>
