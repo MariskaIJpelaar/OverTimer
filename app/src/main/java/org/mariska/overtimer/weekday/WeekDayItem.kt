@@ -14,6 +14,8 @@ class WeekDayItem(day: String) : Parcelable {
 
 
     fun total_hours() : Int {
+        if (!active)
+            return 0
         return start_time.until(end_time, HOURS).toInt()
     }
 

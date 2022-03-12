@@ -13,4 +13,5 @@
     <string name="end_time">end time</string>
     <string name="set_weekhours_description">Check the boxes of the weekdays you work and fill in the start- and end-times. Click on the times to change them. Press submit to save your hours.</string>
     <string name="submit">Submit</string>
+    <string name="dialogue_description">Select your work-date, and then enter a start-time and end-time or fill in the total amount of hours</string>
 </resources>

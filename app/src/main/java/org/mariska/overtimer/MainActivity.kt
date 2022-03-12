@@ -13,9 +13,39 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import org.mariska.overtimer.results.WeekHoursContract
+import org.mariska.overtimer.weekday.WeekDayItem
+import org.mariska.overtimer.weekday.WeekDayManager
 
 
 class MainActivity : AppCompatActivity() {
+    var manager: WeekDayManager =  WeekDayManager( arrayOf(
+        WeekDayItem("Monday"),
+        WeekDayItem("Tuesday"),
+        WeekDayItem("Wednesday"),
+        WeekDayItem("Thursday"),
+        WeekDayItem("Friday"),
+        WeekDayItem("Saturday"),
+        WeekDayItem("Sunday")
+    ))
+
+    fun refresh() {
+        var progress = 100
+        val total_hours = manager.total_hours()
+        if (total_hours != 0)
+            progress = (manager.workedtime / total_hours) * 100
+
+        val set = AnimatorSet()
+        set.playTogether(
+            ObjectAnimator.ofInt(findViewById<ProgressBar>(R.id.hours_progress), "progress", 0, progress),
+            ObjectAnimator.ofInt(findViewById<TextView>(R.id.hours_progress_text), "progress_text", 0, progress)
+        )
+        set.setDuration(2000).start()
+
+        findViewById<TextView>(R.id.hours_progress_text).text = "$progress%"
+        findViewById<TextView>(R.id.overtime_num).text = manager.overtime.toString()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -27,16 +57,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "You clicked register!", Toast.LENGTH_SHORT).show()
         }
 
-        val set = AnimatorSet()
-        set.playTogether(
-            ObjectAnimator.ofInt(findViewById<ProgressBar>(R.id.hours_progress), "progress", 0, 100),
-            ObjectAnimator.ofInt(findViewById<TextView>(R.id.hours_progress_text), "progress_text", 0, 100)
-        )
-        set.setDuration(3000).start()
-
-        findViewById<TextView>(R.id.hours_progress_text).text = "100%"
-        findViewById<TextView>(R.id.overtime_num).text = "0"
-
+        refresh()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -44,9 +65,17 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    val getContent = registerForActivityResult(WeekHoursContract()) { result ->
+        if (result != null) {
+            manager.weekdays = result
+            Toast.makeText(this, manager.total_hours().toString(), Toast.LENGTH_SHORT).show()
+            refresh()
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_weekhours -> {
-            startActivity(Intent(this, SetHoursActivity::class.java))
+            getContent.launch(manager.weekdays)
             true
         } else -> {
             super.onOptionsItemSelected(item)
