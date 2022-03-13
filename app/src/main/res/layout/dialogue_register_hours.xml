@@ -6,9 +6,11 @@
 
     <TextView
         android:id="@+id/dialogue_description"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/dialogue_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,6 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="22-01-2022"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dialogue_description" />
@@ -28,10 +31,10 @@
         android:id="@+id/dialogue_start_time_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
         android:text="@string/start_time"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/dialogue_start_time"
         app:layout_constraintTop_toBottomOf="@id/dialogue_date_picker" />
 
     <TextView
@@ -39,25 +42,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/default_start_time"
-        app:layout_constraintEnd_toStartOf="@id/dialogue_end_time_text"
-        app:layout_constraintStart_toEndOf="@id/dialogue_start_time_text"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/dialogue_end_time"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/dialogue_start_time_text" />
 
     <TextView
         android:id="@+id/dialogue_end_time_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
         android:text="@string/end_time"
-        app:layout_constraintTop_toTopOf="@id/dialogue_start_time_text"
-        app:layout_constraintStart_toEndOf="@id/dialogue_start_time" />
+        app:layout_constraintEnd_toStartOf="@id/dialogue_end_time"
+        app:layout_constraintTop_toTopOf="@id/dialogue_start_time_text" />
 
     <TextView
         android:id="@+id/dialogue_end_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/default_end_time"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/dialogue_end_time_text"
+        app:layout_constraintStart_toEndOf="@id/dialogue_start_time"
         app:layout_constraintTop_toTopOf="@id/dialogue_start_time_text"  />
 
     <EditText
@@ -67,6 +73,7 @@
         android:layout_marginTop="16dp"
         android:hint="0"
         android:inputType="number"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/dialogue_start_time_text" />
@@ -75,7 +82,7 @@
         android:id="@+id/dialogue_work_hours_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Total numbers worked"
+        android:text="Total hours worked"
         app:layout_constraintTop_toBottomOf="@id/dialogue_work_hours_num"
         app:layout_constraintStart_toStartOf="@id/dialogue_work_hours_num"
         app:layout_constraintEnd_toEndOf="@id/dialogue_work_hours_num"/>
