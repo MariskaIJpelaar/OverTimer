@@ -16,7 +16,7 @@ import java.time.LocalTime
 import kotlin.IllegalStateException
 import java.time.temporal.ChronoUnit.HOURS
 
-class RegisterHoursFragment : DialogFragment {
+class RegisterHoursFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             val builder = AlertDialog.Builder(it)
@@ -68,21 +68,23 @@ class RegisterHoursFragment : DialogFragment {
             number_view.setOnFocusChangeListener { _, _ -> number_edited = true }
 
             builder.setView(view)
-                .setPositiveButton("Register", DialogInterface.OnClickListener { dialog, id ->
+                .setPositiveButton("Register") { _, _ ->
                     val weekday = WeekDayItem(date.dayOfWeek.toString())
                     weekday.active = true
                     if (number_edited) {
                         weekday.start_time = LocalTime.of(8, 0)
-                        weekday.end_time = start_time.plusHours(Integer.parseInt(number_view.text.toString()).toLong())
+                        weekday.end_time = start_time.plusHours(
+                            Integer.parseInt(number_view.text.toString()).toLong()
+                        )
                     } else {
                         weekday.start_time = start_time
                         weekday.end_time = end_time
                     }
                     TODO("Return a WeekDayItem to the MainActivity")
-                })
-                .setNegativeButton("Cancel", DialogInterface.OnClickListener { _, _ ->
+                }
+                .setNegativeButton("Cancel") { _, _ ->
                     getDialog()?.cancel()
-                })
+                }
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }
