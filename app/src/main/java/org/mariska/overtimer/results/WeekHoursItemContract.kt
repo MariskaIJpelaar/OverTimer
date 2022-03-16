@@ -19,6 +19,5 @@ class WeekHoursItemContract : ActivityResultContract<Void, WeekDayItem?>() {
     override fun parseResult(resultCode: Int, intent: Intent?): WeekDayItem? = when {
         resultCode != Activity.RESULT_OK -> null
         else -> intent?.getParcelableExtra(ID)
-        TODO("Not yet implemented")
     }
 }

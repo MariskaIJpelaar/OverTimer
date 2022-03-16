@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import org.mariska.overtimer.results.WeekHoursContract
+import org.mariska.overtimer.results.WeekHoursItemContract
 import org.mariska.overtimer.weekday.WeekDayItem
 import org.mariska.overtimer.weekday.WeekDayManager
 
@@ -46,6 +47,12 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.overtime_num).text = manager.overtime.toString()
     }
 
+    private val getContentWeekDayItem = registerForActivityResult(WeekHoursItemContract()) { result ->
+        if (result != null)  {
+
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -65,9 +72,9 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    val getContent = registerForActivityResult(WeekHoursContract()) { result ->
+    private val getContentWeekDays = registerForActivityResult(WeekHoursContract()) { result ->
         if (result != null) {
-            manager.weekdays = result
+            manager.set_weekdays(result)
             Toast.makeText(this, manager.total_hours().toString(), Toast.LENGTH_SHORT).show()
             refresh()
         }
@@ -75,7 +82,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_weekhours -> {
-            getContent.launch(manager.weekdays)
+            getContentWeekDays.launch(manager.get_weekdays())
             true
         } else -> {
             super.onOptionsItemSelected(item)
