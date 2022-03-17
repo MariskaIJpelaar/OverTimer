@@ -21,14 +21,12 @@ class WeekDayManager(days: Array<WeekDayItem>, over_time: Int = 0) {
 
     fun add_time(item : WeekDayItem) {
         val day = weekdays[item.weekday] ?: return
-        //TODO: rethink: cap should be equal to the sum of all max_days. Perhaps keep track of
-        // worked hours per day?
         if (day.active) {
-            val max_day = day.total_hours()
+            val max = day.total_hours()
             var worked = item.total_hours()
-            
-            overtime += max(0, day.hours_worked+worked - max_day)
-            day.hours_worked = min(max_day, day.hours_worked + worked)
+
+            overtime += max(0, day.hours_worked+worked - max)
+            day.hours_worked = min(max, day.hours_worked + worked)
         } else {
             overtime += day.total_hours()
         }

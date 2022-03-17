@@ -11,6 +11,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import org.mariska.overtimer.results.WeekHoursContract
@@ -34,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         var progress = 100
         val total_hours = manager.total_hours()
         if (total_hours != 0)
-            progress = (manager.workedtime / total_hours) * 100
+            progress = (manager.get_hours_worked() / total_hours) * 100
 
         val set = AnimatorSet()
         set.playTogether(
@@ -48,9 +49,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val getContentWeekDayItem = registerForActivityResult(WeekHoursItemContract()) { result ->
-        if (result != null)  {
-
-        }
+        if (result != null)
+            manager.add_time(result)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         findViewById<Button>(R.id.button_register_hours).setOnClickListener {
-            Toast.makeText(applicationContext, "You clicked register!", Toast.LENGTH_SHORT).show()
+            getContentWeekDayItem.launch()
         }
 
         refresh()
