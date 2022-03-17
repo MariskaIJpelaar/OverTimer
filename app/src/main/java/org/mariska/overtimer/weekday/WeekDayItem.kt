@@ -11,6 +11,7 @@ class WeekDayItem(day: String) : Parcelable {
     var weekday: String = day
     var start_time: LocalTime = LocalTime.of(9, 0)
     var end_time: LocalTime = LocalTime.of(17, 0)
+    var hours_worked = 0
 
 
     fun total_hours() : Int {
