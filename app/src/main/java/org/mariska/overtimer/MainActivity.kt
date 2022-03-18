@@ -20,7 +20,7 @@ import org.mariska.overtimer.weekday.WeekDayItem
 import org.mariska.overtimer.weekday.WeekDayManager
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     var manager: WeekDayManager =  WeekDayManager( arrayOf(
         WeekDayItem("Monday"),
         WeekDayItem("Tuesday"),
@@ -48,11 +48,6 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.overtime_num).text = manager.overtime.toString()
     }
 
-    private val getContentWeekDayItem = registerForActivityResult(WeekHoursItemContract()) { result ->
-        if (result != null)
-            manager.add_time(result)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -61,10 +56,15 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         findViewById<Button>(R.id.button_register_hours).setOnClickListener {
-            getContentWeekDayItem.launch()
+            RegisterHoursFragment().show(supportFragmentManager, null)
         }
 
         refresh()
+    }
+
+    // https://android-developers.googleblog.com/2012/05/using-dialogfragments.html
+    override fun onFinishDialog(item : WeekDayItem) {
+        manager.add_time(item)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

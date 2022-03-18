@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,12 +12,20 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import org.mariska.overtimer.weekday.WeekDayItem
+import java.lang.ClassCastException
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.IllegalStateException
 import java.time.temporal.ChronoUnit.HOURS
 
+
+// second answer: https://stackoverflow.com/questions/10905312/receive-result-from-dialogfragment
 class RegisterHoursFragment : DialogFragment() {
+    public interface RegisterHourDialogListener {
+        fun onFinishDialog(item : WeekDayItem)
+    }
+    private var listener: RegisterHourDialogListener? = null
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             val builder = AlertDialog.Builder(it)
@@ -80,12 +89,22 @@ class RegisterHoursFragment : DialogFragment() {
                         weekday.start_time = start_time
                         weekday.end_time = end_time
                     }
-                    TODO("Return a WeekDayItem to the MainActivity")
+                    listener?.onFinishDialog(weekday)
+                    this.dismiss()
                 }
                 .setNegativeButton("Cancel") { _, _ ->
                     getDialog()?.cancel()
                 }
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        try {
+            listener = context as RegisterHourDialogListener
+        } catch (e : ClassCastException) {
+            throw ClassCastException("$context must implement RegisterHourDialogListener")
+        }
     }
 }
