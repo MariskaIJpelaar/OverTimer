@@ -17,6 +17,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.IllegalStateException
 import java.time.temporal.ChronoUnit.HOURS
+import java.util.*
 
 
 // second answer: https://stackoverflow.com/questions/10905312/receive-result-from-dialogfragment
@@ -78,9 +79,10 @@ class RegisterHoursFragment : DialogFragment() {
 
             builder.setView(view)
                 .setPositiveButton("Register") { _, _ ->
-                    val weekday = WeekDayItem(date.dayOfWeek.toString())
+                    val weekday = WeekDayItem(date.dayOfWeek.toString().lowercase()
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() })
                     weekday.active = true
-                    if (number_edited) {
+                    if (number_edited && number_view.text.toString() != "0") {
                         weekday.start_time = LocalTime.of(8, 0)
                         weekday.end_time = start_time.plusHours(
                             Integer.parseInt(number_view.text.toString()).toLong()

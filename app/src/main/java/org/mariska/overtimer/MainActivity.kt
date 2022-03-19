@@ -18,24 +18,23 @@ import org.mariska.overtimer.results.WeekHoursContract
 import org.mariska.overtimer.results.WeekHoursItemContract
 import org.mariska.overtimer.weekday.WeekDayItem
 import org.mariska.overtimer.weekday.WeekDayManager
+import java.io.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
-    var manager: WeekDayManager =  WeekDayManager( arrayOf(
-        WeekDayItem("Monday"),
-        WeekDayItem("Tuesday"),
-        WeekDayItem("Wednesday"),
-        WeekDayItem("Thursday"),
-        WeekDayItem("Friday"),
-        WeekDayItem("Saturday"),
-        WeekDayItem("Sunday")
-    ))
+    var manager: WeekDayManager? = null
+
+    val itemsFile: String = "items.ot"
 
     fun refresh() {
+        if (manager == null)
+            return
+
         var progress = 100
-        val total_hours = manager.total_hours()
+        val total_hours = manager!!.total_hours()
         if (total_hours != 0)
-            progress = (manager.get_hours_worked() / total_hours) * 100
+            progress = (manager!!.get_hours_worked() / total_hours) * 100
 
         val set = AnimatorSet()
         set.playTogether(
@@ -45,7 +44,40 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
         set.setDuration(2000).start()
 
         findViewById<TextView>(R.id.hours_progress_text).text = "$progress%"
-        findViewById<TextView>(R.id.overtime_num).text = manager.overtime.toString()
+        findViewById<TextView>(R.id.overtime_num).text = manager!!.overtime.toString()
+    }
+
+    fun getInternalData() {
+        // https://www.androidauthority.com/how-to-store-data-locally-in-android-app-717190/
+        if (!File(itemsFile).exists()) {
+            manager = WeekDayManager( arrayOf(
+                WeekDayItem("Monday"),
+                WeekDayItem("Tuesday"),
+                WeekDayItem("Wednesday"),
+                WeekDayItem("Thursday"),
+                WeekDayItem("Friday"),
+                WeekDayItem("Saturday"),
+                WeekDayItem("Sunday")
+            ))
+            return
+        }
+
+        // https://stackoverflow.com/questions/57758314/store-custom-kotlin-data-class-to-disk
+        val istream = FileInputStream(itemsFile)
+        val manager_stream = ObjectInputStream(istream)
+        manager = manager_stream.readObject() as? WeekDayManager
+        manager_stream.close()
+        istream.close()
+    }
+
+    fun writeInternalData() {
+        if (manager == null)
+            return
+        val ostream = FileOutputStream(itemsFile)
+        val manager_stream = ObjectOutputStream(ostream)
+        manager_stream.writeObject(manager)
+        manager_stream.close()
+        ostream.close()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,12 +91,14 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
             RegisterHoursFragment().show(supportFragmentManager, null)
         }
 
+        getInternalData()
         refresh()
     }
 
     // https://android-developers.googleblog.com/2012/05/using-dialogfragments.html
     override fun onFinishDialog(item : WeekDayItem) {
-        manager.add_time(item)
+        manager?.add_time(item)
+        refresh()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -74,15 +108,15 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
     private val getContentWeekDays = registerForActivityResult(WeekHoursContract()) { result ->
         if (result != null) {
-            manager.set_weekdays(result)
-            Toast.makeText(this, manager.total_hours().toString(), Toast.LENGTH_SHORT).show()
+            manager?.set_weekdays(result)
+            writeInternalData()
             refresh()
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_weekhours -> {
-            getContentWeekDays.launch(manager.get_weekdays())
+            getContentWeekDays.launch(manager?.get_weekdays())
             true
         } else -> {
             super.onOptionsItemSelected(item)
