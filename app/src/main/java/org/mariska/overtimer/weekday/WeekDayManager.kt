@@ -4,6 +4,7 @@ import java.io.Serializable
 import kotlin.math.max
 import kotlin.math.min
 
+// TODO: make to-string function?
 class WeekDayManager(days: Array<WeekDayItem>, over_time: Int = 0) : Serializable {
     var weekdays: Map<String, WeekDayItem> = days.associateBy({it.weekday}, {it})
     var overtime: Int = over_time

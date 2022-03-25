@@ -5,4 +5,9 @@
         android:id="@+id/action_weekhours"
         android:title="Set Weekhours"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_export"
+        android:title="Export logs"
+        app:showAsAction="never" />
 </menu>

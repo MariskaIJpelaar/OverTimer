@@ -6,6 +6,8 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit.HOURS
 
 
+//TODO: make serializable!
+//TODO: make to-string functions?
 class WeekDayItem(day: String) : Parcelable {
     var active: Boolean = false
     var weekday: String = day

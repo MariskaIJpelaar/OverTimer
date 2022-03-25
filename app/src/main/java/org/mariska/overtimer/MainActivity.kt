@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import org.mariska.overtimer.results.FileSelectContract
 import org.mariska.overtimer.results.WeekHoursContract
 import org.mariska.overtimer.results.WeekHoursItemContract
 import org.mariska.overtimer.weekday.WeekDayItem
@@ -59,11 +60,12 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
                 WeekDayItem("Saturday"),
                 WeekDayItem("Sunday")
             ))
+            getContentWeekDays.launch(manager?.get_weekdays())
             return
         }
 
         // https://stackoverflow.com/questions/57758314/store-custom-kotlin-data-class-to-disk
-        val istream = FileInputStream(itemsFile)
+        val istream = FileInputStream(filesDir.resolve(itemsFile))
         val manager_stream = ObjectInputStream(istream)
         manager = manager_stream.readObject() as? WeekDayManager
         manager_stream.close()
@@ -73,7 +75,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     fun writeInternalData() {
         if (manager == null)
             return
-        val ostream = FileOutputStream(itemsFile)
+        val ostream = FileOutputStream(filesDir.resolve(itemsFile))
         val manager_stream = ObjectOutputStream(ostream)
         manager_stream.writeObject(manager)
         manager_stream.close()
@@ -114,9 +116,23 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
         }
     }
 
+    private val getSelectedFile = registerForActivityResult(FileSelectContract()) { result ->
+        if (result != null && manager != null) {
+            val ostream = FileOutputStream(result.path)
+            val manager_stream = ObjectOutputStream(ostream)
+            manager_stream.writeObject(manager)
+            manager_stream.close()
+            ostream.close()
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_weekhours -> {
             getContentWeekDays.launch(manager?.get_weekdays())
+            true
+        } R.id.action_export -> {
+//            https://stackoverflow.com/questions/49697630/open-file-choose-in-android-app-using-kotlin
+            getSelectedFile.launch()
             true
         } else -> {
             super.onOptionsItemSelected(item)
