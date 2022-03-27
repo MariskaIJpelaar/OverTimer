@@ -1,15 +1,27 @@
 package org.mariska.overtimer.weekday
 
 import java.io.Serializable
+import java.time.LocalDate
+import java.time.temporal.WeekFields
+import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-// TODO: make to-string function?
 class WeekDayManager(days: Array<WeekDayItem>, over_time: Int = 0) : Serializable {
     var weekdays: Map<String, WeekDayItem> = days.associateBy({it.weekday}, {it})
     var overtime: Int = over_time
+    var weekOfYear: Int = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+
+    fun check_week() {
+        val current = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+        if (current != weekOfYear) {
+            weekOfYear = current
+            weekdays.forEach { it.value.hours_worked = 0; }
+        }
+    }
 
     fun get_hours_worked() : Int {
+        check_week()
         return weekdays.map { it.value.hours_worked }.sum()
     }
 

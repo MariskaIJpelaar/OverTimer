@@ -17,6 +17,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.IllegalStateException
 import java.time.temporal.ChronoUnit.HOURS
+import java.time.temporal.WeekFields
 import java.util.*
 
 
@@ -28,8 +29,8 @@ class RegisterHoursFragment : DialogFragment() {
     private var listener: RegisterHourDialogListener? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return activity?.let {
-            val builder = AlertDialog.Builder(it)
+        return activity?.let { act ->
+            val builder = AlertDialog.Builder(act)
             val view = requireActivity().layoutInflater.inflate(R.layout.dialogue_register_hours, null)
 
             if (context == null)
@@ -38,6 +39,7 @@ class RegisterHoursFragment : DialogFragment() {
             var number_edited: Boolean = false;
 
             // date
+            //TODO: month is wrong in DatePickerDialog
             val date_view = view.findViewById<TextView>(R.id.dialogue_date_picker)
             var date = LocalDate.now()
             date_view.text = date.toString()
@@ -91,7 +93,9 @@ class RegisterHoursFragment : DialogFragment() {
                         weekday.start_time = start_time
                         weekday.end_time = end_time
                     }
+                    //TODO: only add the items which belong to this week
                     listener?.onFinishDialog(weekday)
+                    //TODO: log items
                     this.dismiss()
                 }
                 .setNegativeButton("Cancel") { _, _ ->

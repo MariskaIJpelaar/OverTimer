@@ -2,13 +2,11 @@ package org.mariska.overtimer.weekday
 
 import android.os.Parcel
 import android.os.Parcelable
+import java.io.Serializable
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit.HOURS
 
-
-//TODO: make serializable!
-//TODO: make to-string functions?
-class WeekDayItem(day: String) : Parcelable {
+class WeekDayItem(day: String) : Parcelable, Serializable {
     var active: Boolean = false
     var weekday: String = day
     var start_time: LocalTime = LocalTime.of(9, 0)

@@ -1,4 +1,5 @@
 <resources>
+    <string name="log_file">times.log</string>
     <string name="app_name">OverTimer</string>
     <string name="welcome">Welcome!</string>
     <string name="hours_worked">Hours worked</string>

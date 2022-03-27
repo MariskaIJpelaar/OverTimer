@@ -17,12 +17,13 @@ import androidx.appcompat.widget.Toolbar
 import org.mariska.overtimer.results.FileSelectContract
 import org.mariska.overtimer.results.WeekHoursContract
 import org.mariska.overtimer.results.WeekHoursItemContract
+import org.mariska.overtimer.utils.Logger
 import org.mariska.overtimer.weekday.WeekDayItem
 import org.mariska.overtimer.weekday.WeekDayManager
 import java.io.*
 import java.util.*
 
-
+//TODO: consistent variable names!
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     var manager: WeekDayManager? = null
 
@@ -50,7 +51,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
     fun getInternalData() {
         // https://www.androidauthority.com/how-to-store-data-locally-in-android-app-717190/
-        if (!File(itemsFile).exists()) {
+        if (!filesDir.resolve(itemsFile).exists()) {
             manager = WeekDayManager( arrayOf(
                 WeekDayItem("Monday"),
                 WeekDayItem("Tuesday"),
@@ -91,6 +92,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
         findViewById<Button>(R.id.button_register_hours).setOnClickListener {
             RegisterHoursFragment().show(supportFragmentManager, null)
+            writeInternalData()
         }
 
         getInternalData()
@@ -119,9 +121,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     private val getSelectedFile = registerForActivityResult(FileSelectContract()) { result ->
         if (result != null && manager != null) {
             val ostream = FileOutputStream(result.path)
-            val manager_stream = ObjectOutputStream(ostream)
-            manager_stream.writeObject(manager)
-            manager_stream.close()
+            Logger.exportLogs(ostream)
             ostream.close()
         }
     }
