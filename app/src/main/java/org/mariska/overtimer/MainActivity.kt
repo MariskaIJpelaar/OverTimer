@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     private val getSelectedFile = registerForActivityResult(FileSelectContract()) { result ->
         if (result != null && manager != null) {
             val ostream = FileOutputStream(result.path)
-            Logger.exportLogs(ostream)
+            Logger.exportLogs(this, ostream)
             ostream.close()
         }
     }
