@@ -1,5 +1,4 @@
 <resources>
-    <string name="log_file">times.log</string>
     <string name="app_name">OverTimer</string>
     <string name="welcome">Welcome!</string>
     <string name="hours_worked">Hours worked</string>
@@ -15,4 +14,9 @@
     <string name="set_weekhours_description">Check the boxes of the weekdays you work and fill in the start- and end-times. Click on the times to change them. Press submit to save your hours.</string>
     <string name="submit">Submit</string>
     <string name="dialogue_description">Select your work-date, and then enter a start-time and end-time or fill in the total amount of hours</string>
+    <string name="set_weekhours">Set Weekhours</string>
+    <string name="export_logs">Export logs</string>
+    <string name="default_date">22–01-2022</string>
+    <string name="zero">0</string>
+    <string name="total_hours_worked">Total hours worked</string>
 </resources>

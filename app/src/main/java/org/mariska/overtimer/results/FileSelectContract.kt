@@ -7,10 +7,6 @@ import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContract
 
 class FileSelectContract : ActivityResultContract<Void, Uri?>() {
-    companion object {
-        const val ID: String = "FileSelect"
-    }
-
     override fun createIntent(context: Context, input: Void): Intent {
         return Intent().setType("*/*").setAction(Intent.ACTION_GET_CONTENT).apply {  }
     }

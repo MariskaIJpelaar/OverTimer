@@ -13,9 +13,9 @@ import java.time.LocalTime
 // https://guides.codepath.com/android/Using-an-ArrayAdapter-with-ListView
 class WeekDayAdapter(context: Context, objects: Array<out WeekDayItem>) :
     ArrayAdapter<WeekDayItem>(context, 0, objects) {
-    val weekdays : Map<String, WeekDayItem> = objects.associateBy({it.weekday}, {it})
+    private val weekdays : Map<String, WeekDayItem> = objects.associateBy({it.weekday}, {it})
 
-    fun get_weekdays() :  Array<out WeekDayItem> { return weekdays.map { it.value }.toTypedArray()}
+    fun getWeekdays() :  Array<out WeekDayItem> { return weekdays.map { it.value }.toTypedArray()}
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var view = convertView
@@ -36,27 +36,27 @@ class WeekDayAdapter(context: Context, objects: Array<out WeekDayItem>) :
 
         // start - time
         val start = view.findViewById<TextView>(R.id.start_time)
-        start.text = weekDayItem.start_time.toString()
+        start.text = weekDayItem.startTime.toString()
         start.setOnClickListener {
             val current = LocalTime.parse(start.text)
             TimePickerDialog(context, { _, hourOfDay, minutes ->
                 start.text = LocalTime.of(hourOfDay, minutes).toString()
                 active.isChecked = true
                 weekdays[name]?.active = true
-                weekdays[name]?.start_time = LocalTime.of(hourOfDay, minutes)
+                weekdays[name]?.startTime = LocalTime.of(hourOfDay, minutes)
             }, current.hour, current.minute, true).show()
         }
 
         // end - time
         val end = view.findViewById<TextView>(R.id.end_time)
-        end.text = weekDayItem.end_time.toString()
+        end.text = weekDayItem.endTime.toString()
         end.setOnClickListener {
             val current = LocalTime.parse(end.text)
             TimePickerDialog(context, { _, hourOfDay, minutes ->
                 end.text = LocalTime.of(hourOfDay, minutes).toString()
                 active.isChecked = true
                 weekdays[name]?.active = true
-                weekdays[name]?.end_time = LocalTime.of(hourOfDay, minutes)
+                weekdays[name]?.endTime = LocalTime.of(hourOfDay, minutes)
             }, current.hour, current.minute, true).show()
         }
 

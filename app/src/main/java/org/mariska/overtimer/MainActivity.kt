@@ -2,41 +2,35 @@ package org.mariska.overtimer
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import org.mariska.overtimer.results.FileSelectContract
 import org.mariska.overtimer.results.WeekHoursContract
-import org.mariska.overtimer.results.WeekHoursItemContract
 import org.mariska.overtimer.utils.Logger
 import org.mariska.overtimer.weekday.WeekDayItem
 import org.mariska.overtimer.weekday.WeekDayManager
 import java.io.*
-import java.util.*
 
-//TODO: consistent variable names!
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
-    var manager: WeekDayManager? = null
+    private var manager: WeekDayManager? = null
 
-    val itemsFile: String = "items.ot"
+    private val itemsFile: String = "items.ot"
 
-    fun refresh() {
+    private fun refresh() {
         if (manager == null)
             return
 
         var progress = 100
-        val total_hours = manager!!.total_hours()
-        if (total_hours != 0)
-            progress = (manager!!.get_hours_worked() / total_hours) * 100
+        val totalHours = manager!!.totalHours()
+        if (totalHours != 0)
+            progress = (manager!!.getHoursWorked() / totalHours) * 100
 
         val set = AnimatorSet()
         set.playTogether(
@@ -49,7 +43,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
         findViewById<TextView>(R.id.overtime_num).text = manager!!.overtime.toString()
     }
 
-    fun getInternalData() {
+    private fun getInternalData() {
         // https://www.androidauthority.com/how-to-store-data-locally-in-android-app-717190/
         if (!filesDir.resolve(itemsFile).exists()) {
             manager = WeekDayManager( arrayOf(
@@ -61,25 +55,25 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
                 WeekDayItem("Saturday"),
                 WeekDayItem("Sunday")
             ))
-            getContentWeekDays.launch(manager?.get_weekdays())
+            getContentWeekDays.launch(manager?.getWeekdays())
             return
         }
 
         // https://stackoverflow.com/questions/57758314/store-custom-kotlin-data-class-to-disk
         val istream = FileInputStream(filesDir.resolve(itemsFile))
-        val manager_stream = ObjectInputStream(istream)
-        manager = manager_stream.readObject() as? WeekDayManager
-        manager_stream.close()
+        val managerStream = ObjectInputStream(istream)
+        manager = managerStream.readObject() as? WeekDayManager
+        managerStream.close()
         istream.close()
     }
 
-    fun writeInternalData() {
+    private fun writeInternalData() {
         if (manager == null)
             return
         val ostream = FileOutputStream(filesDir.resolve(itemsFile))
-        val manager_stream = ObjectOutputStream(ostream)
-        manager_stream.writeObject(manager)
-        manager_stream.close()
+        val managerStream = ObjectOutputStream(ostream)
+        managerStream.writeObject(manager)
+        managerStream.close()
         ostream.close()
     }
 
@@ -101,7 +95,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
     // https://android-developers.googleblog.com/2012/05/using-dialogfragments.html
     override fun onFinishDialog(item : WeekDayItem) {
-        manager?.add_time(item)
+        manager?.addTime(item)
         refresh()
     }
 
@@ -112,7 +106,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
     private val getContentWeekDays = registerForActivityResult(WeekHoursContract()) { result ->
         if (result != null) {
-            manager?.set_weekdays(result)
+            manager?.setWeekdays(result)
             writeInternalData()
             refresh()
         }
@@ -128,7 +122,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_weekhours -> {
-            getContentWeekDays.launch(manager?.get_weekdays())
+            getContentWeekDays.launch(manager?.getWeekdays())
             true
         } R.id.action_export -> {
 //            https://stackoverflow.com/questions/49697630/open-file-choose-in-android-app-using-kotlin

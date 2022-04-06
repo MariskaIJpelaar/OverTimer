@@ -7,8 +7,8 @@ import java.time.LocalTime
 
 class Logger {
     companion object {
-        val internalFile: String = "logs.log"
-        val format: String = "%s %s %s"
+        private const val internalFile: String = "overtime.log"
+        private const val format: String = "%s %s %s"
 
         fun log(context: ContextWrapper, date: LocalDate, start: LocalTime, end: LocalTime) {
             val ostream = FileOutputStream(context.filesDir.resolve(internalFile))

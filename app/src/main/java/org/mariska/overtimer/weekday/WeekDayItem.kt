@@ -9,42 +9,47 @@ import java.time.temporal.ChronoUnit.HOURS
 class WeekDayItem(day: String) : Parcelable, Serializable {
     var active: Boolean = false
     var weekday: String = day
-    var start_time: LocalTime = LocalTime.of(9, 0)
-    var end_time: LocalTime = LocalTime.of(17, 0)
-    var hours_worked = 0
+    var startTime: LocalTime = LocalTime.of(9, 0)
+    var endTime: LocalTime = LocalTime.of(17, 0)
+    var hoursWorked = 0
 
 
-    fun total_hours() : Int {
+    fun totalHours() : Int {
         if (!active)
             return 0
-        return start_time.until(end_time, HOURS).toInt()
+        return startTime.until(endTime, HOURS).toInt()
     }
 
     constructor(parcel: Parcel) : this("") {
         active = parcel.readByte() != 0.toByte()
         weekday = parcel.readString().orEmpty()
-        start_time = LocalTime.parse(parcel.readString().orEmpty())
-        end_time = LocalTime.parse(parcel.readString().orEmpty())
+        startTime = LocalTime.parse(parcel.readString().orEmpty())
+        endTime = LocalTime.parse(parcel.readString().orEmpty())
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeByte(if (active) 1 else 0)
         parcel.writeString(weekday)
-        parcel.writeString(start_time.toString())
-        parcel.writeString(end_time.toString())
+        parcel.writeString(startTime.toString())
+        parcel.writeString(endTime.toString())
     }
 
     override fun describeContents(): Int {
         return 0
     }
 
-    companion object CREATOR : Parcelable.Creator<WeekDayItem> {
-        override fun createFromParcel(parcel: Parcel): WeekDayItem {
-            return WeekDayItem(parcel)
+    companion object {
+        @JvmField
+        final val CREATOR: Parcelable.Creator<WeekDayItem> =  object: Parcelable.Creator<WeekDayItem> {
+            override fun createFromParcel(parcel: Parcel): WeekDayItem {
+                return WeekDayItem(parcel)
+            }
+
+            override fun newArray(size: Int): Array<WeekDayItem?> {
+                return arrayOfNulls(size)
+            }
         }
 
-        override fun newArray(size: Int): Array<WeekDayItem?> {
-            return arrayOfNulls(size)
-        }
+        private const val serialVersionUID: Long = 2355114125920513
     }
 }
