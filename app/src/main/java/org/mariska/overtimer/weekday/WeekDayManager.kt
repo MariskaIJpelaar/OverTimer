@@ -7,11 +7,9 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-class WeekDayManager(days: Array<WeekDayItem>, over_time: Int = 0) : Serializable {
-    companion object {
-        private const val serialVersionUID: Long = 1311417518
-    }
 
+//https://kotlinlang.org/docs/serialization.html#example-json-serialization
+class WeekDayManager(days: Array<WeekDayItem>, over_time: Int = 0) {
     private var weekdays: Map<String, WeekDayItem> = days.associateBy({it.weekday}, {it})
     var overtime: Int = over_time
     private var weekOfYear: Int = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
