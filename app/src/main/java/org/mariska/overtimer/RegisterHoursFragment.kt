@@ -79,8 +79,7 @@ class RegisterHoursFragment : DialogFragment() {
 
             builder.setView(view)
                 .setPositiveButton("Register") { _, _ ->
-                    val weekday = WeekDayItem(date.dayOfWeek.toString().lowercase()
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() })
+                    val weekday = WeekDayItem(date.dayOfWeek)
                     weekday.active = true
                     if (numberEdited && numberView.text.toString() != "0") {
                         weekday.startTime = LocalTime.of(8, 0)
@@ -92,7 +91,7 @@ class RegisterHoursFragment : DialogFragment() {
                         weekday.endTime = endTime
                     }
 
-                    Logger.log(act, date, startTime, endTime)
+                    Logger.log(date, startTime, endTime)
                     listener?.onFinishDialog(weekday)
                     this.dismiss()
                 }

@@ -17,6 +17,7 @@ import org.mariska.overtimer.utils.Logger
 import org.mariska.overtimer.weekday.WeekDayItem
 import org.mariska.overtimer.weekday.WeekDayManager
 import java.io.*
+import java.time.DayOfWeek
 
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     private var manager: WeekDayManager? = null
@@ -47,13 +48,13 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
         // https://www.androidauthority.com/how-to-store-data-locally-in-android-app-717190/
         if (!filesDir.resolve(itemsFile).exists()) {
             manager = WeekDayManager( arrayOf(
-                WeekDayItem("Monday"),
-                WeekDayItem("Tuesday"),
-                WeekDayItem("Wednesday"),
-                WeekDayItem("Thursday"),
-                WeekDayItem("Friday"),
-                WeekDayItem("Saturday"),
-                WeekDayItem("Sunday")
+                WeekDayItem(DayOfWeek.MONDAY),
+                WeekDayItem(DayOfWeek.TUESDAY),
+                WeekDayItem(DayOfWeek.WEDNESDAY),
+                WeekDayItem(DayOfWeek.THURSDAY),
+                WeekDayItem(DayOfWeek.FRIDAY),
+                WeekDayItem(DayOfWeek.SATURDAY),
+                WeekDayItem(DayOfWeek.SUNDAY)
             ))
             getContentWeekDays.launch(manager?.getWeekdays())
             return

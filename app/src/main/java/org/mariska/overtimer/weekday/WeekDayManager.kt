@@ -1,18 +1,21 @@
 package org.mariska.overtimer.weekday
 
+import org.mariska.overtimer.database.OverTimerDatabaseDao
 import java.io.Serializable
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.WeekFields
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-
-//https://kotlinlang.org/docs/serialization.html#example-json-serialization
+//TODO: read-in weekdays from database, update hours in database,
+//TODO: add overtime to database?
 class WeekDayManager(days: Array<WeekDayItem>, over_time: Int = 0) {
-    private var weekdays: Map<String, WeekDayItem> = days.associateBy({it.weekday}, {it})
+    private var weekdays: Map<DayOfWeek, WeekDayItem> = days.associateBy({it.weekday}, {it})
     var overtime: Int = over_time
     private var weekOfYear: Int = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+    private lateinit var overTimerDao: OverTimerDatabaseDao
 
     private fun checkWeek() {
         val current = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())

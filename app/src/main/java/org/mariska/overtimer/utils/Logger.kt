@@ -1,29 +1,31 @@
 package org.mariska.overtimer.utils
 
-import android.content.ContextWrapper
+import androidx.lifecycle.LifecycleOwner
+import org.mariska.overtimer.database.OverTimerDatabaseDao
 import java.io.*
 import java.time.LocalDate
 import java.time.LocalTime
 
 class Logger {
     companion object {
-        private const val internalFile: String = "overtime.log"
         private const val format: String = "%s %s %s"
+        private lateinit var overTimerDao: OverTimerDatabaseDao
 
-        fun log(context: ContextWrapper, date: LocalDate, start: LocalTime, end: LocalTime) {
-            val ostream = FileOutputStream(context.filesDir.resolve(internalFile))
-            val logWriter = ObjectOutputStream(ostream)
-            val content: String = String.format(format, date.toString(), start, end)
-            logWriter.writeBytes(content)
-            logWriter.close()
-            ostream.close()
+        fun log(date: LocalDate, start: LocalTime, end: LocalTime) {
+            overTimerDao.insert(LogItem(day = date, startTime = start, endTime = end))
         }
-        fun exportLogs(context: ContextWrapper, oStream: FileOutputStream) {
+
+        private fun toString(logItem: LogItem) : String {
+            return format.format(logItem.day.toString(), logItem.startTime.toString(), logItem.endTime.toString())
+        }
+
+        fun exportLogs(owner: LifecycleOwner, oStream: FileOutputStream) {
             val logWriter = ObjectOutputStream(oStream)
-            val istream = FileInputStream(context.filesDir.resolve(internalFile))
-            val logReader = ObjectInputStream(istream)
-            logWriter.writeBytes(logReader.readBytes().toString())
-            logReader.close()
+
+            val logs = overTimerDao.getAllLogs()
+            logs.observe(owner) { items ->
+                items?.forEach { logWriter.writeUTF(toString(it)) }
+            }
             logWriter.close()
         }
     }

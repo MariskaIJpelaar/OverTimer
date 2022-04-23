@@ -2,16 +2,13 @@ package org.mariska.overtimer.weekday
 
 import android.os.Parcel
 import android.os.Parcelable
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import java.io.Serializable
+import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit.HOURS
 
-class WeekDayItem(day: String) : Parcelable, Serializable {
+class WeekDayItem(day: DayOfWeek) : Parcelable {
     var active: Boolean = false
-    var weekday: String = day
+    var weekday: DayOfWeek = day
     var startTime: LocalTime = LocalTime.of(9, 0)
     var endTime: LocalTime = LocalTime.of(17, 0)
     var hoursWorked = 0
@@ -23,16 +20,16 @@ class WeekDayItem(day: String) : Parcelable, Serializable {
         return startTime.until(endTime, HOURS).toInt()
     }
 
-    constructor(parcel: Parcel) : this("") {
+    constructor(parcel: Parcel) : this(DayOfWeek.MONDAY) {
         active = parcel.readByte() != 0.toByte()
-        weekday = parcel.readString().orEmpty()
+        weekday = DayOfWeek.valueOf(parcel.readString().orEmpty())
         startTime = LocalTime.parse(parcel.readString().orEmpty())
         endTime = LocalTime.parse(parcel.readString().orEmpty())
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeByte(if (active) 1 else 0)
-        parcel.writeString(weekday)
+        parcel.writeString(weekday.toString())
         parcel.writeString(startTime.toString())
         parcel.writeString(endTime.toString())
     }
