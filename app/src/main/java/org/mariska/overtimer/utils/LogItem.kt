@@ -9,12 +9,12 @@ import java.time.LocalTime
 //https://developer.android.com/codelabs/kotlin-android-training-room-database#3
 @Entity(tableName="logged_times")
 data class LogItem(
-    @PrimaryKey(autoGenerate = true)
-    var logId: Long = 0L,
-    @ColumnInfo
+    @PrimaryKey(autoGenerate = false)
     var day: LocalDate = LocalDate.now(),
     @ColumnInfo(name="start_time")
     var startTime: LocalTime = LocalTime.now(),
-    @ColumnInfo(name="emd_time")
-    var endTime: LocalTime = LocalTime.now()
+    @ColumnInfo(name="end_time")
+    var endTime: LocalTime = LocalTime.now(),
+    @ColumnInfo(name="over_time")
+    var overtime: Int = 0
 )

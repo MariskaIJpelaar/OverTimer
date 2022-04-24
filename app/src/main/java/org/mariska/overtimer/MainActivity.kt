@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.activity.result.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import org.mariska.overtimer.database.OverTimerDatabaseDao
 import org.mariska.overtimer.results.FileSelectContract
 import org.mariska.overtimer.results.WeekHoursContract
 import org.mariska.overtimer.utils.Logger
@@ -21,6 +22,7 @@ import java.time.DayOfWeek
 
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     private var manager: WeekDayManager? = null
+    private lateinit var overTimerDao: OverTimerDatabaseDao
 
     private val itemsFile: String = "items.ot"
 
@@ -45,37 +47,35 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     }
 
     private fun getInternalData() {
-        // https://www.androidauthority.com/how-to-store-data-locally-in-android-app-717190/
-        if (!filesDir.resolve(itemsFile).exists()) {
-            manager = WeekDayManager( arrayOf(
-                WeekDayItem(DayOfWeek.MONDAY),
-                WeekDayItem(DayOfWeek.TUESDAY),
-                WeekDayItem(DayOfWeek.WEDNESDAY),
-                WeekDayItem(DayOfWeek.THURSDAY),
-                WeekDayItem(DayOfWeek.FRIDAY),
-                WeekDayItem(DayOfWeek.SATURDAY),
-                WeekDayItem(DayOfWeek.SUNDAY)
-            ))
-            getContentWeekDays.launch(manager?.getWeekdays())
-            return
+        //TODO: lateinit property overTimerDao has not been initialized
+        val days = overTimerDao.getAllDays()
+        days.observe(this) {
+            if (it.isEmpty()) {
+                manager = WeekDayManager(
+                    arrayOf(
+                        WeekDayItem(DayOfWeek.MONDAY),
+                        WeekDayItem(DayOfWeek.TUESDAY),
+                        WeekDayItem(DayOfWeek.WEDNESDAY),
+                        WeekDayItem(DayOfWeek.THURSDAY),
+                        WeekDayItem(DayOfWeek.FRIDAY),
+                        WeekDayItem(DayOfWeek.SATURDAY),
+                        WeekDayItem(DayOfWeek.SUNDAY)
+                    )
+                )
+                getContentWeekDays.launch(manager?.getWeekdays())
+            } else {
+                val array = it.map { day ->
+                    val item = WeekDayItem(day.day)
+                    item.active = day.active
+                    item.date = day.date
+                    item.startTime = day.startTime
+                    item.endTime = day.endTime
+                    item.hoursWorked = day.hoursWorked
+                    item
+                }.toTypedArray()
+                manager = WeekDayManager(array)
+            }
         }
-
-        // https://stackoverflow.com/questions/57758314/store-custom-kotlin-data-class-to-disk
-        val istream = FileInputStream(filesDir.resolve(itemsFile))
-        val managerStream = ObjectInputStream(istream)
-        manager = managerStream.readObject() as? WeekDayManager
-        managerStream.close()
-        istream.close()
-    }
-
-    private fun writeInternalData() {
-        if (manager == null)
-            return
-        val ostream = FileOutputStream(filesDir.resolve(itemsFile))
-        val managerStream = ObjectOutputStream(ostream)
-        managerStream.writeObject(manager)
-        managerStream.close()
-        ostream.close()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +87,6 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
         findViewById<Button>(R.id.button_register_hours).setOnClickListener {
             RegisterHoursFragment().show(supportFragmentManager, null)
-            writeInternalData()
         }
 
         getInternalData()
@@ -108,7 +107,6 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     private val getContentWeekDays = registerForActivityResult(WeekHoursContract()) { result ->
         if (result != null) {
             manager?.setWeekdays(result)
-            writeInternalData()
             refresh()
         }
     }

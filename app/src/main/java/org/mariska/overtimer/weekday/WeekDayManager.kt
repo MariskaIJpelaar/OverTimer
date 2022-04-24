@@ -1,6 +1,7 @@
 package org.mariska.overtimer.weekday
 
 import org.mariska.overtimer.database.OverTimerDatabaseDao
+import org.mariska.overtimer.utils.Logger
 import java.io.Serializable
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -9,19 +10,26 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-//TODO: read-in weekdays from database, update hours in database,
-//TODO: add overtime to database?
-class WeekDayManager(days: Array<WeekDayItem>, over_time: Int = 0) {
+class WeekDayManager(days: Array<WeekDayItem>) {
     private var weekdays: Map<DayOfWeek, WeekDayItem> = days.associateBy({it.weekday}, {it})
-    var overtime: Int = over_time
-    private var weekOfYear: Int = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
     private lateinit var overTimerDao: OverTimerDatabaseDao
+    var overtime: Int = overTimerDao.getOvertime()
+    private var weekOfYear: Int = getWeekOfYear()
+
+    private fun getWeekOfYear() : Int {
+        var value: Int = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+        weekdays.filter { it.value.active }.firstNotNullOf { item ->
+            value = item.value.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+        }
+        return value
+    }
 
     private fun checkWeek() {
         val current = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
         if (current != weekOfYear) {
             weekOfYear = current
             weekdays.forEach { it.value.hoursWorked = 0; }
+            overTimerDao.clearThisWeek()
         }
     }
 
@@ -39,16 +47,20 @@ class WeekDayManager(days: Array<WeekDayItem>, over_time: Int = 0) {
     }
 
     fun addTime(item : WeekDayItem) {
-        val day = weekdays[item.weekday] ?: return
-        if (day.active) {
+        val day = weekdays[item.weekday]
+        val currentOvertime: Int
+        if (day != null && day.active) {
             val max = day.totalHours()
             val worked = item.totalHours()
 
-            overtime += max(0, day.hoursWorked+worked - max)
-            day.hoursWorked = min(max, day.hoursWorked + worked)
+            currentOvertime = max(0, day.hoursWorked+worked - max)
+            if (day.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()) == weekOfYear)
+                day.hoursWorked = min(max, day.hoursWorked + worked)
         } else {
-            overtime += day.totalHours()
+            currentOvertime = item.totalHours()
         }
+        overtime += currentOvertime
+        Logger.log(item.date, item.startTime, item.endTime, currentOvertime)
     }
 
     fun totalHours() : Int {

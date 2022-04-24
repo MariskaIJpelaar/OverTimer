@@ -8,12 +8,13 @@ import android.view.ViewGroup
 import android.widget.*
 import org.mariska.overtimer.R
 import java.lang.RuntimeException
+import java.time.DayOfWeek
 import java.time.LocalTime
 
 // https://guides.codepath.com/android/Using-an-ArrayAdapter-with-ListView
 class WeekDayAdapter(context: Context, objects: Array<out WeekDayItem>) :
     ArrayAdapter<WeekDayItem>(context, 0, objects) {
-    private val weekdays : Map<String, WeekDayItem> = objects.associateBy({it.weekday}, {it})
+    private val weekdays : Map<DayOfWeek, WeekDayItem> = objects.associateBy({it.weekday}, {it})
 
     fun getWeekdays() :  Array<out WeekDayItem> { return weekdays.map { it.value }.toTypedArray()}
 
@@ -31,7 +32,7 @@ class WeekDayAdapter(context: Context, objects: Array<out WeekDayItem>) :
         // active
         val active = view.findViewById<CheckBox>(R.id.checkBox)
         active.isChecked = weekDayItem.active
-        view.findViewById<TextView>(R.id.weekday).text = weekDayItem.weekday
+        view.findViewById<TextView>(R.id.weekday).text = weekDayItem.weekday.toString()
         weekdays[name]?.active = weekDayItem.active
 
         // start - time

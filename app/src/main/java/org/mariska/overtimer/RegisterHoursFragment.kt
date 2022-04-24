@@ -91,7 +91,6 @@ class RegisterHoursFragment : DialogFragment() {
                         weekday.endTime = endTime
                     }
 
-                    Logger.log(date, startTime, endTime)
                     listener?.onFinishDialog(weekday)
                     this.dismiss()
                 }
