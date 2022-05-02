@@ -13,12 +13,18 @@ import kotlin.math.min
 class WeekDayManager(days: Array<WeekDayItem>) {
     private var weekdays: Map<DayOfWeek, WeekDayItem> = days.associateBy({it.weekday}, {it})
     private lateinit var overTimerDao: OverTimerDatabaseDao
-    var overtime: Int = overTimerDao.getOvertime()
+    var overtime: Int? = null
     private var weekOfYear: Int = getWeekOfYear()
+
+    fun init(overTimerDatabaseDao: OverTimerDatabaseDao) {
+        overTimerDao = overTimerDatabaseDao
+//        TODO: https://stackoverflow.com/questions/44167111/android-room-simple-select-query-cannot-access-database-on-the-main-thread
+        overtime = overTimerDao.getOvertime()
+    }
 
     private fun getWeekOfYear() : Int {
         var value: Int = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
-        weekdays.filter { it.value.active }.firstNotNullOf { item ->
+        weekdays.filter { it.value.active }.firstNotNullOfOrNull { item ->
             value = item.value.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
         }
         return value
@@ -59,8 +65,8 @@ class WeekDayManager(days: Array<WeekDayItem>) {
         } else {
             currentOvertime = item.totalHours()
         }
-        overtime += currentOvertime
-        Logger.log(item.date, item.startTime, item.endTime, currentOvertime)
+        overtime = overtime?.plus(currentOvertime)
+        Logger.log(overTimerDao, item.date, item.startTime, item.endTime, currentOvertime)
     }
 
     fun totalHours() : Int {

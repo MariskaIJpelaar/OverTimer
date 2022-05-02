@@ -9,7 +9,7 @@ import org.mariska.overtimer.weekday.WeekDayItemEntity
 interface OverTimerDatabaseDao {
     // NOTE: on conflict, returns -1
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(item: LogItem): Int
+    fun insert(item: LogItem): Long
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(item: WeekDayItemEntity)
     @Update

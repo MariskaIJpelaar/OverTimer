@@ -11,6 +11,8 @@ import android.widget.TextView
 import androidx.activity.result.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.room.Room
+import org.mariska.overtimer.database.OverTimerDatabase
 import org.mariska.overtimer.database.OverTimerDatabaseDao
 import org.mariska.overtimer.results.FileSelectContract
 import org.mariska.overtimer.results.WeekHoursContract
@@ -47,7 +49,6 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     }
 
     private fun getInternalData() {
-        //TODO: lateinit property overTimerDao has not been initialized
         val days = overTimerDao.getAllDays()
         days.observe(this) {
             if (it.isEmpty()) {
@@ -62,6 +63,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
                         WeekDayItem(DayOfWeek.SUNDAY)
                     )
                 )
+                manager!!.init(overTimerDao)
                 getContentWeekDays.launch(manager?.getWeekdays())
             } else {
                 val array = it.map { day ->
@@ -74,6 +76,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
                     item
                 }.toTypedArray()
                 manager = WeekDayManager(array)
+                manager!!.init(overTimerDao)
             }
         }
     }
@@ -81,6 +84,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        overTimerDao = OverTimerDatabase.getInstance(this).overTimerDatabaseDao
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar_main)
         setSupportActionBar(toolbar)
@@ -114,7 +118,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     private val getSelectedFile = registerForActivityResult(FileSelectContract()) { result ->
         if (result != null && manager != null) {
             val ostream = FileOutputStream(result.path)
-            Logger.exportLogs(this, ostream)
+            Logger.exportLogs(overTimerDao, this, ostream)
             ostream.close()
         }
     }

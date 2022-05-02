@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import org.mariska.overtimer.utils.LogItem
+import org.mariska.overtimer.weekday.WeekDayItemEntity
 
-@Database(entities = [LogItem::class], version = 1, exportSchema = true)
+@Database(entities = [LogItem::class, WeekDayItemEntity::class], version = 1, exportSchema = true)
+@TypeConverters(OverTimerConverters::class)
 abstract class OverTimerDatabase : RoomDatabase() {
     abstract val overTimerDatabaseDao: OverTimerDatabaseDao
     companion object {

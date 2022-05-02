@@ -9,11 +9,10 @@ import java.time.LocalTime
 class Logger {
     companion object {
         private const val format: String = "%s %s-%s, overtime: %s"
-        private lateinit var overTimerDao: OverTimerDatabaseDao
 
-        fun log(date: LocalDate, start: LocalTime, end: LocalTime, overtime: Int) {
+        fun log(overTimerDao: OverTimerDatabaseDao, date: LocalDate, start: LocalTime, end: LocalTime, overtime: Int) {
             val item = LogItem(day = date, startTime = start, endTime = end, overtime = overtime)
-            if (overTimerDao.insert(item) == -1)
+            if (overTimerDao.insert(item) == -1L)
                 overTimerDao.update(item)
         }
 
@@ -21,7 +20,7 @@ class Logger {
             return format.format(logItem.day.toString(), logItem.startTime.toString(), logItem.endTime.toString(), logItem.overtime.toString())
         }
 
-        fun exportLogs(owner: LifecycleOwner, oStream: FileOutputStream) {
+        fun exportLogs(overTimerDao: OverTimerDatabaseDao, owner: LifecycleOwner, oStream: FileOutputStream) {
             val logWriter = ObjectOutputStream(oStream)
 
             val logs = overTimerDao.getAllLogs()
