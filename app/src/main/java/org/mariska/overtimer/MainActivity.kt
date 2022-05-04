@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
                         WeekDayItem(DayOfWeek.SUNDAY)
                     )
                 )
-                manager!!.init(overTimerDao)
+                manager!!.init(overTimerDao, this)
                 getContentWeekDays.launch(manager?.getWeekdays())
             } else {
                 val array = it.map { day ->
@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
                     item
                 }.toTypedArray()
                 manager = WeekDayManager(array)
-                manager!!.init(overTimerDao)
+                manager!!.init(overTimerDao, this)
             }
         }
     }

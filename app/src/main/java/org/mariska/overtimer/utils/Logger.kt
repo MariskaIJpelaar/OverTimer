@@ -10,7 +10,7 @@ class Logger {
     companion object {
         private const val format: String = "%s %s-%s, overtime: %s"
 
-        fun log(overTimerDao: OverTimerDatabaseDao, date: LocalDate, start: LocalTime, end: LocalTime, overtime: Int) {
+        suspend fun log(overTimerDao: OverTimerDatabaseDao, date: LocalDate, start: LocalTime, end: LocalTime, overtime: Int) {
             val item = LogItem(day = date, startTime = start, endTime = end, overtime = overtime)
             if (overTimerDao.insert(item) == -1L)
                 overTimerDao.update(item)

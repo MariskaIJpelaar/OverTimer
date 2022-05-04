@@ -1,5 +1,6 @@
 package org.mariska.overtimer.weekday
 
+import androidx.lifecycle.LifecycleOwner
 import org.mariska.overtimer.database.OverTimerDatabaseDao
 import org.mariska.overtimer.utils.Logger
 import java.io.Serializable
@@ -16,10 +17,11 @@ class WeekDayManager(days: Array<WeekDayItem>) {
     var overtime: Int? = null
     private var weekOfYear: Int = getWeekOfYear()
 
-    fun init(overTimerDatabaseDao: OverTimerDatabaseDao) {
+    fun init(overTimerDatabaseDao: OverTimerDatabaseDao, owner: LifecycleOwner) {
         overTimerDao = overTimerDatabaseDao
-//        TODO: https://stackoverflow.com/questions/44167111/android-room-simple-select-query-cannot-access-database-on-the-main-thread
-        overtime = overTimerDao.getOvertime()
+        overTimerDao.getOvertime().observe(owner) { result ->
+            overtime = result ?: 0
+        }
     }
 
     private fun getWeekOfYear() : Int {
@@ -66,6 +68,8 @@ class WeekDayManager(days: Array<WeekDayItem>) {
             currentOvertime = item.totalHours()
         }
         overtime = overtime?.plus(currentOvertime)
+        //TODO: create coroutine
+        // maybe with: https://www.raywenderlich.com/7414647-coroutines-with-room-persistence-library
         Logger.log(overTimerDao, item.date, item.startTime, item.endTime, currentOvertime)
     }
 

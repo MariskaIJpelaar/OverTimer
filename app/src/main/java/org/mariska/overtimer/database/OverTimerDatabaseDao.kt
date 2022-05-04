@@ -9,7 +9,7 @@ import org.mariska.overtimer.weekday.WeekDayItemEntity
 interface OverTimerDatabaseDao {
     // NOTE: on conflict, returns -1
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(item: LogItem): Long
+    suspend fun insert(item: LogItem): Long
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(item: WeekDayItemEntity)
     @Update
@@ -21,5 +21,5 @@ interface OverTimerDatabaseDao {
     @Query("SELECT * FROM recent_week")
     fun getAllDays(): LiveData<List<WeekDayItemEntity>>
     @Query("SELECT SUM(over_time) FROM logged_times")
-    fun getOvertime(): Int
+    fun getOvertime(): LiveData<Int>
 }
