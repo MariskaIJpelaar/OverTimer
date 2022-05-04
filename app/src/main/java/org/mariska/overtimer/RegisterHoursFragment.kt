@@ -37,7 +37,6 @@ class RegisterHoursFragment : DialogFragment() {
             var numberEdited = false
 
             // date
-            //TODO: month is wrong in DatePickerDialog
             val dateView = view.findViewById<TextView>(R.id.dialogue_date_picker)
             var date = LocalDate.now()
             dateView.text = date.toString()
@@ -45,7 +44,7 @@ class RegisterHoursFragment : DialogFragment() {
                 DatePickerDialog(requireContext(), { _, year, month, dayOfMonth ->
                     date = LocalDate.of(year, month, dayOfMonth)
                     dateView.text = date.toString()
-                }, date.year, date.monthValue, date.dayOfMonth).show()
+                }, date.year, date.monthValue-1, date.dayOfMonth).show()
             }
 
             // dependencies

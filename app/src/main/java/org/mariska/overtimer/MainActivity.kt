@@ -9,11 +9,11 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.result.launch
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.room.Room
-import org.mariska.overtimer.database.OverTimerDatabase
-import org.mariska.overtimer.database.OverTimerDatabaseDao
+import org.mariska.overtimer.database.*
 import org.mariska.overtimer.results.FileSelectContract
 import org.mariska.overtimer.results.WeekHoursContract
 import org.mariska.overtimer.utils.Logger
@@ -24,8 +24,10 @@ import java.time.DayOfWeek
 
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     private var manager: WeekDayManager? = null
-    private lateinit var overTimerDao: OverTimerDatabaseDao
     private lateinit var logger: Logger
+    private val overTimeViewModel : OverTimerViewModel by viewModels {
+        OverTimerViewModelFactory((application as OverTimerApplication).repository)
+    }
 
     private fun refresh() {
         if (manager == null)
@@ -43,12 +45,16 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
         )
         set.setDuration(2000).start()
 
+        overTimeViewModel.overtime.observe(this) { time ->
+            if (time != null)
+                findViewById<TextView>(R.id.overtime_num).text = time.toString()
+        }
         findViewById<TextView>(R.id.hours_progress_text).text = "$progress%"
-        findViewById<TextView>(R.id.overtime_num).text = manager!!.overtime.toString()
+        findViewById<TextView>(R.id.overtime_num).text = "0"
     }
 
     private fun getInternalData() {
-        val days = overTimerDao.getAllDays()
+        val days = overTimeViewModel.allDays
         days.observe(this) {
             if (it.isEmpty()) {
                 manager = WeekDayManager(
@@ -62,8 +68,9 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
                         WeekDayItem(DayOfWeek.SUNDAY)
                     )
                 )
-                manager!!.init(overTimerDao, this)
+                manager!!.init(overTimeViewModel)
                 getContentWeekDays.launch(manager?.getWeekdays())
+                refresh()
             } else {
                 val array = it.map { day ->
                     val item = WeekDayItem(day.day)
@@ -75,7 +82,8 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
                     item
                 }.toTypedArray()
                 manager = WeekDayManager(array)
-                manager!!.init(overTimerDao, this)
+                manager!!.init(overTimeViewModel)
+                refresh()
             }
         }
     }
@@ -83,8 +91,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        overTimerDao = OverTimerDatabase.getInstance(this).overTimerDatabaseDao
-        logger = Logger(overTimerDao)
+        logger = Logger(overTimeViewModel)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar_main)
         setSupportActionBar(toolbar)

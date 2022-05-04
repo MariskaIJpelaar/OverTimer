@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.mariska.overtimer.database.OverTimerDatabaseDao
+import org.mariska.overtimer.database.OverTimerViewModel
 import org.mariska.overtimer.utils.Logger
 import java.io.Serializable
 import java.time.DayOfWeek
@@ -14,19 +15,15 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-class WeekDayManager(days: Array<WeekDayItem>) : ViewModel() {
+class WeekDayManager(days: Array<WeekDayItem>) {
     private var weekdays: Map<DayOfWeek, WeekDayItem> = days.associateBy({it.weekday}, {it})
-    private lateinit var overTimerDao: OverTimerDatabaseDao
-    var overtime: Int? = null
+    private lateinit var overTimerViewModel: OverTimerViewModel
     private var weekOfYear: Int = getWeekOfYear()
     private lateinit var logger: Logger
 
-    fun init(overTimerDatabaseDao: OverTimerDatabaseDao, owner: LifecycleOwner) {
-        overTimerDao = overTimerDatabaseDao
-        overTimerDao.getOvertime().observe(owner) { result ->
-            overtime = result ?: 0
-        }
-        logger = Logger(overTimerDao)
+    fun init(viewModel: OverTimerViewModel) {
+        overTimerViewModel = viewModel
+        logger = Logger(overTimerViewModel)
     }
 
     private fun getWeekOfYear() : Int {
@@ -42,7 +39,7 @@ class WeekDayManager(days: Array<WeekDayItem>) : ViewModel() {
         if (current != weekOfYear) {
             weekOfYear = current
             weekdays.forEach { it.value.hoursWorked = 0; }
-            overTimerDao.clearThisWeek()
+            overTimerViewModel.clearThisWeek()
         }
     }
 
@@ -51,19 +48,10 @@ class WeekDayManager(days: Array<WeekDayItem>) : ViewModel() {
         return weekdays.map { it.value.hoursWorked }.sum()
     }
 
-    fun setWeekdays(days: Array<out WeekDayItem>) { viewModelScope.launch {
+    fun setWeekdays(days: Array<out WeekDayItem>) {
         weekdays = days.associateBy({it.weekday}, {it})
-        overTimerDao.insertAll(
-            *(weekdays.values.map { value -> WeekDayItemEntity(
-                day = value.weekday,
-                date = value.date,
-                active = value.active,
-                startTime = value.startTime,
-                endTime = value.endTime,
-                hoursWorked = value.hoursWorked
-            )}.toTypedArray())
-        )
-    }}
+        overTimerViewModel.insertAll(weekdays.values.toTypedArray())
+    }
 
     fun getWeekdays() : Array<out WeekDayItem> {
         return weekdays.values.toTypedArray()
@@ -82,7 +70,6 @@ class WeekDayManager(days: Array<WeekDayItem>) : ViewModel() {
         } else {
             currentOvertime = item.totalHours()
         }
-        overtime = overtime?.plus(currentOvertime)
         logger.log(item.date, item.startTime, item.endTime, currentOvertime)
     }
 
