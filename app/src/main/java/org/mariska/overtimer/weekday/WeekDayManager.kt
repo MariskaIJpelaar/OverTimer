@@ -16,12 +16,14 @@ class WeekDayManager(days: Array<WeekDayItem>) {
     private lateinit var overTimerDao: OverTimerDatabaseDao
     var overtime: Int? = null
     private var weekOfYear: Int = getWeekOfYear()
+    private lateinit var logger: Logger
 
     fun init(overTimerDatabaseDao: OverTimerDatabaseDao, owner: LifecycleOwner) {
         overTimerDao = overTimerDatabaseDao
         overTimerDao.getOvertime().observe(owner) { result ->
             overtime = result ?: 0
         }
+        logger = Logger(overTimerDao)
     }
 
     private fun getWeekOfYear() : Int {
@@ -68,9 +70,7 @@ class WeekDayManager(days: Array<WeekDayItem>) {
             currentOvertime = item.totalHours()
         }
         overtime = overtime?.plus(currentOvertime)
-        //TODO: create coroutine
-        // maybe with: https://www.raywenderlich.com/7414647-coroutines-with-room-persistence-library
-        Logger.log(overTimerDao, item.date, item.startTime, item.endTime, currentOvertime)
+        logger.log(item.date, item.startTime, item.endTime, currentOvertime)
     }
 
     fun totalHours() : Int {

@@ -25,8 +25,7 @@ import java.time.DayOfWeek
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     private var manager: WeekDayManager? = null
     private lateinit var overTimerDao: OverTimerDatabaseDao
-
-    private val itemsFile: String = "items.ot"
+    private lateinit var logger: Logger
 
     private fun refresh() {
         if (manager == null)
@@ -85,6 +84,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         overTimerDao = OverTimerDatabase.getInstance(this).overTimerDatabaseDao
+        logger = Logger(overTimerDao)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar_main)
         setSupportActionBar(toolbar)
@@ -118,8 +118,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     private val getSelectedFile = registerForActivityResult(FileSelectContract()) { result ->
         if (result != null && manager != null) {
             val ostream = FileOutputStream(result.path)
-            Logger.exportLogs(overTimerDao, this, ostream)
-            ostream.close()
+            logger.exportLogs(this, ostream)
         }
     }
 
