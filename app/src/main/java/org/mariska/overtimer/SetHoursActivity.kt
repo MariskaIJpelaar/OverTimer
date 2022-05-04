@@ -10,7 +10,6 @@ import org.mariska.overtimer.results.WeekHoursContract
 import org.mariska.overtimer.weekday.WeekDayAdapter
 import org.mariska.overtimer.weekday.WeekDayItem
 
-// TODO: hours are not saved
 class SetHoursActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

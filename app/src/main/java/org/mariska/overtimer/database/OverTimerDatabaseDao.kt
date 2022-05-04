@@ -12,6 +12,8 @@ interface OverTimerDatabaseDao {
     suspend fun insert(item: LogItem): Long
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(item: WeekDayItemEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(vararg item: WeekDayItemEntity)
     @Update
     fun update(item: LogItem)
     @Query("DELETE FROM recent_week")

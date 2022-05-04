@@ -1,6 +1,9 @@
 package org.mariska.overtimer.weekday
 
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.mariska.overtimer.database.OverTimerDatabaseDao
 import org.mariska.overtimer.utils.Logger
 import java.io.Serializable
@@ -11,7 +14,7 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-class WeekDayManager(days: Array<WeekDayItem>) {
+class WeekDayManager(days: Array<WeekDayItem>) : ViewModel() {
     private var weekdays: Map<DayOfWeek, WeekDayItem> = days.associateBy({it.weekday}, {it})
     private lateinit var overTimerDao: OverTimerDatabaseDao
     var overtime: Int? = null
@@ -48,9 +51,19 @@ class WeekDayManager(days: Array<WeekDayItem>) {
         return weekdays.map { it.value.hoursWorked }.sum()
     }
 
-    fun setWeekdays(days: Array<out WeekDayItem>) {
+    fun setWeekdays(days: Array<out WeekDayItem>) { viewModelScope.launch {
         weekdays = days.associateBy({it.weekday}, {it})
-    }
+        overTimerDao.insertAll(
+            *(weekdays.values.map { value -> WeekDayItemEntity(
+                day = value.weekday,
+                date = value.date,
+                active = value.active,
+                startTime = value.startTime,
+                endTime = value.endTime,
+                hoursWorked = value.hoursWorked
+            )}.toTypedArray())
+        )
+    }}
 
     fun getWeekdays() : Array<out WeekDayItem> {
         return weekdays.values.toTypedArray()
