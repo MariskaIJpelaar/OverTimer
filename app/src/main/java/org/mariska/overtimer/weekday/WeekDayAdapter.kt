@@ -32,6 +32,10 @@ class WeekDayAdapter(context: Context, objects: Array<out WeekDayItem>) :
         // active
         val active = view.findViewById<CheckBox>(R.id.checkBox)
         active.isChecked = weekDayItem.active
+        active.setOnCheckedChangeListener { _, isChecked ->
+            weekdays[name]?.active = isChecked
+        }
+
         view.findViewById<TextView>(R.id.weekday).text = weekDayItem.weekday.toString()
         weekdays[name]?.active = weekDayItem.active
 
