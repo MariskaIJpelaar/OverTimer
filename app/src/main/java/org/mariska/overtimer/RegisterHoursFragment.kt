@@ -20,6 +20,7 @@ import java.util.*
 
 
 // second answer: https://stackoverflow.com/questions/10905312/receive-result-from-dialogfragment
+// TODO: Registers everything as overtime
 class RegisterHoursFragment : DialogFragment() {
     interface RegisterHourDialogListener {
         fun onFinishDialog(item : WeekDayItem)

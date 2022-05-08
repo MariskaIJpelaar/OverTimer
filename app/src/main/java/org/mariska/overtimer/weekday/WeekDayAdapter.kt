@@ -6,66 +6,75 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.recyclerview.widget.RecyclerView
 import org.mariska.overtimer.R
 import java.lang.RuntimeException
 import java.time.DayOfWeek
 import java.time.LocalTime
+import kotlin.coroutines.coroutineContext
 
 // https://guides.codepath.com/android/Using-an-ArrayAdapter-with-ListView
-class WeekDayAdapter(context: Context, objects: Array<out WeekDayItem>) :
-    ArrayAdapter<WeekDayItem>(context, 0, objects) {
-    private val weekdays : Map<DayOfWeek, WeekDayItem> = objects.associateBy({it.weekday}, {it})
+//https://www.geeksforgeeks.org/android-recyclerview-in-kotlin/
+class WeekDayAdapter(private val context: Context, private val weekdays: List<WeekDayItem>) :
+    RecyclerView.Adapter<WeekDayAdapter.ViewHolder>() {
+    fun getWeekDays() : List<WeekDayItem> {
+        return weekdays
+    }
 
-    fun getWeekdays() :  Array<out WeekDayItem> { return weekdays.map { it.value }.toTypedArray()}
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.row, parent, false)
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        var view = convertView
-        if (view == null) {
-            view = LayoutInflater.from(context).inflate(R.layout.row, parent, false)
-            if (view == null)
-                throw RuntimeException("Help, view remains null!")
-        }
+        return ViewHolder(view)
+    }
 
-        val weekDayItem = getItem(position) ?: throw RuntimeException("Help, item is null!")
-        val name = weekDayItem.weekday
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item: WeekDayItem = weekdays[position]
 
         // active
-        val active = view.findViewById<CheckBox>(R.id.checkBox)
-        active.isChecked = weekDayItem.active
-        weekdays[name]?.active = weekDayItem.active
-        active.setOnCheckedChangeListener { checkbox, isChecked ->
-            weekdays[name]?.active = isChecked
-            checkbox.isChecked = isChecked
+        holder.activeView.isChecked = item.active
+        holder.activeView.setOnCheckedChangeListener { _, isChecked ->
+            item.active = isChecked
         }
 
-        view.findViewById<TextView>(R.id.weekday).text = weekDayItem.weekday.toString()
+        // weekday
+        holder.weekDayView.text = item.weekday.toString()
 
-        // start - time
-        val start = view.findViewById<TextView>(R.id.start_time)
-        start.text = weekDayItem.startTime.toString()
-        start.setOnClickListener {
-            val current = LocalTime.parse(start.text)
+        // start-time
+        holder.startView.text = item.startTime.toString()
+        holder.startView.setOnClickListener {
+            val current = LocalTime.parse(holder.startView.text)
             TimePickerDialog(context, { _, hourOfDay, minutes ->
-                start.text = LocalTime.of(hourOfDay, minutes).toString()
-                active.isChecked = true
-                weekdays[name]?.active = true
-                weekdays[name]?.startTime = LocalTime.of(hourOfDay, minutes)
+                holder.startView.text = LocalTime.of(hourOfDay, minutes).toString()
+                item.active = true
+                holder.activeView.isChecked = true
+                item.startTime = LocalTime.of(hourOfDay, minutes)
             }, current.hour, current.minute, true).show()
         }
 
-        // end - time
-        val end = view.findViewById<TextView>(R.id.end_time)
-        end.text = weekDayItem.endTime.toString()
-        end.setOnClickListener {
-            val current = LocalTime.parse(end.text)
+        // end-time
+        holder.endView.text = item.endTime.toString()
+        holder.endView.setOnClickListener {
+            val current = LocalTime.parse(holder.endView.text)
             TimePickerDialog(context, { _, hourOfDay, minutes ->
-                end.text = LocalTime.of(hourOfDay, minutes).toString()
-                active.isChecked = true
-                weekdays[name]?.active = true
-                weekdays[name]?.endTime = LocalTime.of(hourOfDay, minutes)
+                holder.endView.text = LocalTime.of(hourOfDay, minutes).toString()
+                item.active = true
+                holder.activeView.isChecked = true
+                item.endTime = LocalTime.of(hourOfDay, minutes)
             }, current.hour, current.minute, true).show()
         }
+    }
 
-        return view
+    override fun getItemCount(): Int {
+        return weekdays.size
+    }
+
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+//        val imageView: ImageView = itemView.findViewById(R.id.imageview)
+//        val textView: TextView = itemView.findViewById(R.id.textView)
+        val activeView = itemView.findViewById<CheckBox>(R.id.checkBox)
+        val weekDayView = itemView.findViewById<TextView>(R.id.weekday)
+        val startView = itemView.findViewById<TextView>(R.id.start_time)
+        val endView = itemView.findViewById<TextView>(R.id.end_time)
     }
 }
