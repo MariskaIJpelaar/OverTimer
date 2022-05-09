@@ -20,7 +20,6 @@ import java.util.*
 
 
 // second answer: https://stackoverflow.com/questions/10905312/receive-result-from-dialogfragment
-// TODO: Registers everything as overtime
 class RegisterHoursFragment : DialogFragment() {
     interface RegisterHourDialogListener {
         fun onFinishDialog(item : WeekDayItem)
@@ -43,7 +42,7 @@ class RegisterHoursFragment : DialogFragment() {
             dateView.text = date.toString()
             dateView.setOnClickListener {
                 DatePickerDialog(requireContext(), { _, year, month, dayOfMonth ->
-                    date = LocalDate.of(year, month, dayOfMonth)
+                    date = LocalDate.of(year, month+1, dayOfMonth)
                     dateView.text = date.toString()
                 }, date.year, date.monthValue-1, date.dayOfMonth).show()
             }

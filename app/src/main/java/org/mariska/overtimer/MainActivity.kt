@@ -34,6 +34,8 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
             return
 
         var progress = 100
+        //TODO: since totalHours can be calculated from the current_days table
+        // --> Also make LiveData and observable!
         val totalHours = manager!!.totalHours()
         if (totalHours != 0)
             progress = (manager!!.getHoursWorked() / totalHours) * 100
@@ -50,7 +52,10 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
                 findViewById<TextView>(R.id.overtime_num).text = time.toString()
         }
         findViewById<TextView>(R.id.hours_progress_text).text = "$progress%"
-        findViewById<TextView>(R.id.overtime_num).text = "0"
+        if (overTimeViewModel.overtime.value != null)
+            findViewById<TextView>(R.id.overtime_num).text = overTimeViewModel.overtime.value.toString()
+        else
+            findViewById<TextView>(R.id.overtime_num).text = "0"
     }
 
     private fun getInternalData() {
