@@ -15,15 +15,13 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-class WeekDayManager(days: Array<WeekDayItem>) {
-    private var weekdays: Map<DayOfWeek, WeekDayItem> = days.associateBy({it.weekday}, {it})
-    private lateinit var overTimerViewModel: OverTimerViewModel
+// TODO: check which functions can be pushdowned to ROOM
+class WeekDayManager(private var overTimerViewModel: OverTimerViewModel) {
+    private var weekdays: Map<DayOfWeek, WeekDayItem> = overTimerViewModel.getAllDays()
     private var weekOfYear: Int = getWeekOfYear()
-    private lateinit var logger: Logger
-
-    fun init(viewModel: OverTimerViewModel) {
-        overTimerViewModel = viewModel
-        logger = Logger(overTimerViewModel)
+    private var logger: Logger = Logger(overTimerViewModel)
+    init {
+        checkWeek()
     }
 
     private fun getWeekOfYear() : Int {

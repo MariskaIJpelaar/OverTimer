@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import org.mariska.overtimer.utils.LogItem
 import org.mariska.overtimer.weekday.WeekDayItem
 import java.lang.IllegalArgumentException
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -14,6 +15,19 @@ class OverTimerViewModel(private val repository: OverTimerRepository) : ViewMode
     val allLogs = repository.allLogs
     val allDays = repository.allDays
     val overtime = repository.overtime
+
+    fun getAllDays(): Map<DayOfWeek, WeekDayItem> {
+        val value = allDays.value ?: return emptyMap()
+        return value.map { day ->
+            val item = WeekDayItem(day.day)
+            item.active = day.active
+            item.date = day.date
+            item.startTime = day.startTime
+            item.endTime = day.endTime
+            item.hoursWorked = day.hoursWorked
+            item
+        }.associateBy({it.weekday}, {it})
+    }
 
     fun insert(item: LogItem) = viewModelScope.launch {
         repository.insert(item)
