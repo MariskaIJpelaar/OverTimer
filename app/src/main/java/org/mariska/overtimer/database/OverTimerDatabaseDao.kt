@@ -22,6 +22,8 @@ interface OverTimerDatabaseDao {
     fun getAllLogs(): LiveData<List<LogItem>>
     @Query("SELECT * FROM recent_week")
     fun getAllDays(): LiveData<List<WeekDayItemEntity>>
+    @Query("SELECT * FROM recent_week WHERE active == 1")
+    fun getAllActiveDays(): LiveData<List<WeekDayItemEntity>>
     @Query("SELECT SUM(over_time) FROM logged_times")
     fun getOvertime(): LiveData<Int>
 }

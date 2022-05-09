@@ -12,6 +12,7 @@ import java.time.LocalTime
 class OverTimerRepository(private val overTimerDatabaseDao: OverTimerDatabaseDao) {
     val allLogs = overTimerDatabaseDao.getAllLogs()
     val allDays = overTimerDatabaseDao.getAllDays()
+    val allActiveDays = overTimerDatabaseDao.getAllActiveDays()
     val overtime = overTimerDatabaseDao.getOvertime()
 
     @Suppress("RedundantSuspendModifier")

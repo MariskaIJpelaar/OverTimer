@@ -14,6 +14,7 @@ import java.time.LocalTime
 class OverTimerViewModel(private val repository: OverTimerRepository) : ViewModel() {
     val allLogs = repository.allLogs
     val allDays = repository.allDays
+    val allActiveDays = repository.allActiveDays
     val overtime = repository.overtime
 
     fun getAllDays(): Map<DayOfWeek, WeekDayItem> {

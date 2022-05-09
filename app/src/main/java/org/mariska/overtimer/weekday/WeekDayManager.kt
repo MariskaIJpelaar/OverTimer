@@ -26,8 +26,8 @@ class WeekDayManager(private var overTimerViewModel: OverTimerViewModel) {
 
     private fun getWeekOfYear() : Int {
         var value: Int = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
-        weekdays.filter { it.value.active }.firstNotNullOfOrNull { item ->
-            value = item.value.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+        overTimerViewModel.allActiveDays.value?.firstNotNullOf { item ->
+            value = item.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
         }
         return value
     }
@@ -36,27 +36,27 @@ class WeekDayManager(private var overTimerViewModel: OverTimerViewModel) {
         val current = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
         if (current != weekOfYear) {
             weekOfYear = current
-            weekdays.forEach { it.value.hoursWorked = 0; }
+//            weekdays.forEach { it.value.hoursWorked = 0; }
             overTimerViewModel.clearThisWeek()
         }
     }
 
     fun getHoursWorked() : Int {
-        checkWeek()
-        return weekdays.map { it.value.hoursWorked }.sum()
+        return overTimerViewModel.allDays.value?.sumOf { it.hoursWorked } ?: 0;
+
     }
 
-    fun setWeekdays(days: Array<out WeekDayItem>) {
-        weekdays = days.associateBy({it.weekday}, {it})
-        overTimerViewModel.insertAll(weekdays.values.toTypedArray())
-    }
+//    fun setWeekdays(days: Array<out WeekDayItem>) {
+//        weekdays = days.associateBy({it.weekday}, {it})
+//        overTimerViewModel.insertAll(weekdays.values.toTypedArray())
+//    }
 
     fun getWeekdays() : Array<out WeekDayItem> {
         return weekdays.values.toTypedArray()
     }
 
     fun addTime(item : WeekDayItem) {
-        val day = weekdays[item.weekday]
+        val day = overTimerViewModel.getAllDays()[item.weekday]
         val currentOvertime: Int
         if (day != null && day.active) {
             val max = day.totalHours()
