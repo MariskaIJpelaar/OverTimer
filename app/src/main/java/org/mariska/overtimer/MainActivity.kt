@@ -22,23 +22,23 @@ import org.mariska.overtimer.weekday.WeekDayManager
 import java.io.*
 import java.time.DayOfWeek
 
+// TODO: Fixme:
+// Caused by: java.lang.NullPointerException: null cannot be cast to non-null type org.mariska.overtimer.database.OverTimerApplication
+//        at org.mariska.overtimer.MainActivity$overTimeViewModel$2.invoke(MainActivity.kt:28)
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
-    private var manager: WeekDayManager? = null
     private lateinit var logger: Logger
     private val overTimeViewModel : OverTimerViewModel by viewModels {
         OverTimerViewModelFactory((application as OverTimerApplication).repository)
     }
+    private var manager: WeekDayManager = WeekDayManager(overTimeViewModel)
 
-    private fun refresh() {
-        if (manager == null)
-            return
-
+    private fun displayProgress(totalHours: Int, hoursWorked: Int) {
         var progress = 100
-        //TODO: since totalHours can be calculated from the current_days table
-        // --> Also make LiveData and observable!
-        val totalHours = manager!!.totalHours()
         if (totalHours != 0)
-            progress = (manager!!.getHoursWorked() / totalHours) * 100
+            progress = (hoursWorked / totalHours) * 100
+
+        val progressText = findViewById<TextView>(R.id.hours_progress_text)
+        progressText.text = "$progress%"
 
         val set = AnimatorSet()
         set.playTogether(
@@ -46,51 +46,6 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
             ObjectAnimator.ofInt(findViewById<TextView>(R.id.hours_progress_text), "progress_text", 0, progress)
         )
         set.setDuration(2000).start()
-
-        overTimeViewModel.overtime.observe(this) { time ->
-            if (time != null)
-                findViewById<TextView>(R.id.overtime_num).text = time.toString()
-        }
-        findViewById<TextView>(R.id.hours_progress_text).text = "$progress%"
-        if (overTimeViewModel.overtime.value != null)
-            findViewById<TextView>(R.id.overtime_num).text = overTimeViewModel.overtime.value.toString()
-        else
-            findViewById<TextView>(R.id.overtime_num).text = "0"
-    }
-
-    private fun getInternalData() {
-        val days = overTimeViewModel.allDays
-        days.observe(this) {
-            if (it.isEmpty()) {
-                manager = WeekDayManager(
-                    arrayOf(
-                        WeekDayItem(DayOfWeek.MONDAY),
-                        WeekDayItem(DayOfWeek.TUESDAY),
-                        WeekDayItem(DayOfWeek.WEDNESDAY),
-                        WeekDayItem(DayOfWeek.THURSDAY),
-                        WeekDayItem(DayOfWeek.FRIDAY),
-                        WeekDayItem(DayOfWeek.SATURDAY),
-                        WeekDayItem(DayOfWeek.SUNDAY)
-                    )
-                )
-                manager!!.init(overTimeViewModel)
-                getContentWeekDays.launch(manager?.getWeekdays())
-                refresh()
-            } else {
-                val array = it.map { day ->
-                    val item = WeekDayItem(day.day)
-                    item.active = day.active
-                    item.date = day.date
-                    item.startTime = day.startTime
-                    item.endTime = day.endTime
-                    item.hoursWorked = day.hoursWorked
-                    item
-                }.toTypedArray()
-                manager = WeekDayManager(array)
-                manager!!.init(overTimeViewModel)
-                refresh()
-            }
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,19 +55,46 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar_main)
         setSupportActionBar(toolbar)
-
         findViewById<Button>(R.id.button_register_hours).setOnClickListener {
             RegisterHoursFragment().show(supportFragmentManager, null)
         }
 
-        getInternalData()
-        refresh()
+        // get weekday-schedule if required
+        val days = overTimeViewModel.allDays.value
+        if (days == null || days.isEmpty()) {
+            getContentWeekDays.launch(arrayOf(
+                WeekDayItem(DayOfWeek.MONDAY),
+                WeekDayItem(DayOfWeek.TUESDAY),
+                WeekDayItem(DayOfWeek.WEDNESDAY),
+                WeekDayItem(DayOfWeek.THURSDAY),
+                WeekDayItem(DayOfWeek.FRIDAY),
+                WeekDayItem(DayOfWeek.SATURDAY),
+                WeekDayItem(DayOfWeek.SUNDAY)
+            ))
+        }
+
+        displayProgress(overTimeViewModel.totalHours.value ?: 0, overTimeViewModel.hoursWorked.value ?: 0)
+        overTimeViewModel.totalHours.observe(this) { totalHours ->
+            displayProgress(totalHours, overTimeViewModel.hoursWorked.value ?: 0)
+        }
+        overTimeViewModel.hoursWorked.observe(this) { hoursWorked ->
+            displayProgress(overTimeViewModel.totalHours.value ?: 0, hoursWorked)
+        }
+
+        // Overtime-display
+        overTimeViewModel.overtime.observe(this) { time ->
+            if (time != null)
+                findViewById<TextView>(R.id.overtime_num).text = time.toString()
+        }
+        if (overTimeViewModel.overtime.value != null)
+            findViewById<TextView>(R.id.overtime_num).text = overTimeViewModel.overtime.value.toString()
+        else
+            findViewById<TextView>(R.id.overtime_num).text = "0"
     }
 
     // https://android-developers.googleblog.com/2012/05/using-dialogfragments.html
     override fun onFinishDialog(item : WeekDayItem) {
-        manager?.addTime(item)
-        refresh()
+        manager.addTime(item)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -122,13 +104,12 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
     private val getContentWeekDays = registerForActivityResult(WeekHoursContract()) { result ->
         if (result != null) {
-            manager?.setWeekdays(result)
-            refresh()
+            overTimeViewModel.insertAll(result)
         }
     }
 
     private val getSelectedFile = registerForActivityResult(FileSelectContract()) { result ->
-        if (result != null && manager != null) {
+        if (result != null) {
             val ostream = FileOutputStream(result.path)
             logger.exportLogs(this, ostream)
         }
@@ -136,7 +117,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_weekhours -> {
-            getContentWeekDays.launch(manager?.getWeekdays())
+            getContentWeekDays.launch(manager.getWeekdays())
             true
         } R.id.action_export -> {
 //            https://stackoverflow.com/questions/49697630/open-file-choose-in-android-app-using-kotlin

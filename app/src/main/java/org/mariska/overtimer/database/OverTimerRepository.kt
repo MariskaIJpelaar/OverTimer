@@ -1,9 +1,11 @@
 package org.mariska.overtimer.database
 
 import androidx.annotation.WorkerThread
+import kotlinx.serialization.descriptors.PrimitiveKind
 import org.mariska.overtimer.utils.LogItem
 import org.mariska.overtimer.weekday.WeekDayItem
 import org.mariska.overtimer.weekday.WeekDayItemEntity
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -14,6 +16,8 @@ class OverTimerRepository(private val overTimerDatabaseDao: OverTimerDatabaseDao
     val allDays = overTimerDatabaseDao.getAllDays()
     val allActiveDays = overTimerDatabaseDao.getAllActiveDays()
     val overtime = overTimerDatabaseDao.getOvertime()
+
+
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
@@ -49,6 +53,13 @@ class OverTimerRepository(private val overTimerDatabaseDao: OverTimerDatabaseDao
             ) }.toTypedArray()
         )
     }
+
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    suspend fun update(day: DayOfWeek, hoursWorked: Int ) {
+        overTimerDatabaseDao.update(day, hoursWorked)
+    }
+
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread

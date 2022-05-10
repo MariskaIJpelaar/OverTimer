@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import org.mariska.overtimer.utils.LogItem
 import org.mariska.overtimer.weekday.WeekDayItemEntity
+import java.time.DayOfWeek
 
 @Dao
 interface OverTimerDatabaseDao {
@@ -16,6 +17,8 @@ interface OverTimerDatabaseDao {
     suspend fun insertAll(vararg item: WeekDayItemEntity)
     @Update
     fun update(item: LogItem)
+    @Query("UPDATE recent_week SET hours_worked = :hoursWorked WHERE day = :day ")
+    fun update(day: DayOfWeek, hoursWorked: Int)
     @Query("DELETE FROM recent_week")
     fun clearThisWeek()
     @Query("SELECT * FROM logged_times ORDER BY day, start_time, end_time")
