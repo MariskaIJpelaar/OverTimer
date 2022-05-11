@@ -25,6 +25,7 @@ import java.time.DayOfWeek
 // TODO: Fixme:
 // Caused by: java.lang.NullPointerException: null cannot be cast to non-null type org.mariska.overtimer.database.OverTimerApplication
 //        at org.mariska.overtimer.MainActivity$overTimeViewModel$2.invoke(MainActivity.kt:28)
+// java.lang.NoClassDefFoundError: Failed resolution of: Landroid/view/OnBackInvokedCallback
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     private lateinit var logger: Logger
     private val overTimeViewModel : OverTimerViewModel by viewModels {
