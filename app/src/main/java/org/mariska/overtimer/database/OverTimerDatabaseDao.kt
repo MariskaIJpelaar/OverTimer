@@ -12,15 +12,15 @@ interface OverTimerDatabaseDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(item: LogItem): Long
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(item: WeekDayItemEntity)
+    suspend fun insert(item: WeekDayItemEntity)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg item: WeekDayItemEntity)
     @Update
-    fun update(item: LogItem)
+    suspend fun update(item: LogItem)
     @Query("UPDATE recent_week SET hours_worked = :hoursWorked WHERE day = :day ")
-    fun update(day: DayOfWeek, hoursWorked: Int)
+    suspend fun update(day: DayOfWeek, hoursWorked: Int)
     @Query("DELETE FROM recent_week")
-    fun clearThisWeek()
+    suspend fun clearThisWeek()
     @Query("SELECT * FROM logged_times ORDER BY day, start_time, end_time")
     fun getAllLogs(): LiveData<List<LogItem>>
     @Query("SELECT * FROM recent_week")

@@ -12,26 +12,28 @@ import androidx.activity.result.launch
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
 import androidx.room.Room
 import org.mariska.overtimer.database.*
 import org.mariska.overtimer.results.FileSelectContract
 import org.mariska.overtimer.results.WeekHoursContract
 import org.mariska.overtimer.utils.Logger
 import org.mariska.overtimer.weekday.WeekDayItem
+import org.mariska.overtimer.weekday.WeekDayItemEntity
 import org.mariska.overtimer.weekday.WeekDayManager
 import java.io.*
 import java.time.DayOfWeek
 
-// TODO: Fixme:
-// Caused by: java.lang.NullPointerException: null cannot be cast to non-null type org.mariska.overtimer.database.OverTimerApplication
-//        at org.mariska.overtimer.MainActivity$overTimeViewModel$2.invoke(MainActivity.kt:28)
-// java.lang.NoClassDefFoundError: Failed resolution of: Landroid/view/OnBackInvokedCallback
+//TODO: does not save week-schedule
+//TODO: does not update hours-worked progress
+//FIXME: for all LiveData.value calls:
+// https://stackoverflow.com/questions/44428389/livedata-getvalue-returns-null-with-room
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     private lateinit var logger: Logger
+    private lateinit var manager: WeekDayManager
     private val overTimeViewModel : OverTimerViewModel by viewModels {
         OverTimerViewModelFactory((application as OverTimerApplication).repository)
     }
-    private var manager: WeekDayManager = WeekDayManager(overTimeViewModel)
 
     private fun displayProgress(totalHours: Int, hoursWorked: Int) {
         var progress = 100
@@ -52,6 +54,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        manager = WeekDayManager(overTimeViewModel)
         logger = Logger(overTimeViewModel)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar_main)
@@ -61,6 +64,10 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
         }
 
         // get weekday-schedule if required
+        overTimeViewModel.allDays.observe(this,  Observer<List<WeekDayItemEntity>>() {
+
+        })
+
         val days = overTimeViewModel.allDays.value
         if (days == null || days.isEmpty()) {
             getContentWeekDays.launch(arrayOf(
