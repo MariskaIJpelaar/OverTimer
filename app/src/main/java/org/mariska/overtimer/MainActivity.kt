@@ -28,6 +28,7 @@ import java.time.DayOfWeek
 //TODO: does not update hours-worked progress
 //FIXME: for all LiveData.value calls:
 // https://stackoverflow.com/questions/44428389/livedata-getvalue-returns-null-with-room
+// OR: https://medium.com/@karenmartirosyan_64397/how-to-create-a-clean-splash-screen-with-mvvm-pattern-kotlin-coroutines-328e579f3524
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     private lateinit var logger: Logger
     private lateinit var manager: WeekDayManager
