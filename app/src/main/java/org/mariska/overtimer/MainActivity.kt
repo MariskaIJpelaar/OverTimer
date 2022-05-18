@@ -18,6 +18,7 @@ import org.mariska.overtimer.database.*
 import org.mariska.overtimer.results.FileSelectContract
 import org.mariska.overtimer.results.WeekHoursContract
 import org.mariska.overtimer.utils.Logger
+import org.mariska.overtimer.utils.observeOnce
 import org.mariska.overtimer.weekday.WeekDayItem
 import org.mariska.overtimer.weekday.WeekDayItemEntity
 import org.mariska.overtimer.weekday.WeekDayManager
@@ -29,6 +30,8 @@ import java.time.DayOfWeek
 //FIXME: for all LiveData.value calls:
 // https://stackoverflow.com/questions/44428389/livedata-getvalue-returns-null-with-room
 // OR: https://medium.com/@karenmartirosyan_64397/how-to-create-a-clean-splash-screen-with-mvvm-pattern-kotlin-coroutines-328e579f3524
+// https://www.mongodb.com/developer/how-to/splash-screen-android/
+// https://github.com/mongodb-developer/SplashScreen-Android
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     private lateinit var logger: Logger
     private lateinit var manager: WeekDayManager
@@ -65,21 +68,18 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
         }
 
         // get weekday-schedule if required
-        overTimeViewModel.allDays.observe(this,  Observer<List<WeekDayItemEntity>>() {
-
-        })
-
-        val days = overTimeViewModel.allDays.value
-        if (days == null || days.isEmpty()) {
-            getContentWeekDays.launch(arrayOf(
-                WeekDayItem(DayOfWeek.MONDAY),
-                WeekDayItem(DayOfWeek.TUESDAY),
-                WeekDayItem(DayOfWeek.WEDNESDAY),
-                WeekDayItem(DayOfWeek.THURSDAY),
-                WeekDayItem(DayOfWeek.FRIDAY),
-                WeekDayItem(DayOfWeek.SATURDAY),
-                WeekDayItem(DayOfWeek.SUNDAY)
-            ))
+        overTimeViewModel.allDays.observeOnce(this) { days ->
+            if (days == null || days.isEmpty()) {
+                getContentWeekDays.launch(arrayOf(
+                    WeekDayItem(DayOfWeek.MONDAY),
+                    WeekDayItem(DayOfWeek.TUESDAY),
+                    WeekDayItem(DayOfWeek.WEDNESDAY),
+                    WeekDayItem(DayOfWeek.THURSDAY),
+                    WeekDayItem(DayOfWeek.FRIDAY),
+                    WeekDayItem(DayOfWeek.SATURDAY),
+                    WeekDayItem(DayOfWeek.SUNDAY)
+                ))
+            }
         }
 
         displayProgress(overTimeViewModel.totalHours.value ?: 0, overTimeViewModel.hoursWorked.value ?: 0)
