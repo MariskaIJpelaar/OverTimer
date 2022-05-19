@@ -25,13 +25,6 @@ import org.mariska.overtimer.weekday.WeekDayManager
 import java.io.*
 import java.time.DayOfWeek
 
-//TODO: does not save week-schedule
-//TODO: does not update hours-worked progress
-//FIXME: for all LiveData.value calls:
-// https://stackoverflow.com/questions/44428389/livedata-getvalue-returns-null-with-room
-// OR: https://medium.com/@karenmartirosyan_64397/how-to-create-a-clean-splash-screen-with-mvvm-pattern-kotlin-coroutines-328e579f3524
-// https://www.mongodb.com/developer/how-to/splash-screen-android/
-// https://github.com/mongodb-developer/SplashScreen-Android
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
     private lateinit var logger: Logger
     private lateinit var manager: WeekDayManager
@@ -42,7 +35,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     private fun displayProgress(totalHours: Int, hoursWorked: Int) {
         var progress = 100
         if (totalHours != 0)
-            progress = (hoursWorked / totalHours) * 100
+            progress = ((hoursWorked * 100) / totalHours)
 
         val progressText = findViewById<TextView>(R.id.hours_progress_text)
         progressText.text = "$progress%"
@@ -84,10 +77,14 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
         displayProgress(overTimeViewModel.totalHours.value ?: 0, overTimeViewModel.hoursWorked.value ?: 0)
         overTimeViewModel.totalHours.observe(this) { totalHours ->
-            displayProgress(totalHours, overTimeViewModel.hoursWorked.value ?: 0)
+            overTimeViewModel.hoursWorked.observeOnce(this) { hoursWorked ->
+                displayProgress(totalHours, hoursWorked ?: 0)
+            }
         }
         overTimeViewModel.hoursWorked.observe(this) { hoursWorked ->
-            displayProgress(overTimeViewModel.totalHours.value ?: 0, hoursWorked)
+            overTimeViewModel.totalHours.observeOnce(this) { totalHours ->
+                displayProgress(totalHours ?: 0, hoursWorked)
+            }
         }
 
         // Overtime-display
@@ -129,6 +126,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
             getContentWeekDays.launch(manager.getWeekdays())
             true
         } R.id.action_export -> {
+            // TODO: test
 //            https://stackoverflow.com/questions/49697630/open-file-choose-in-android-app-using-kotlin
             getSelectedFile.launch()
             true

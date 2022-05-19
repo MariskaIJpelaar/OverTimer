@@ -8,6 +8,7 @@ import android.content.Context
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.TextView
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import org.mariska.overtimer.utils.Logger
 import org.mariska.overtimer.weekday.WeekDayItem
@@ -34,8 +35,6 @@ class RegisterHoursFragment : DialogFragment() {
             if (context == null)
                 throw IllegalStateException("Context cannot be null")
 
-            var numberEdited = false
-
             // date
             val dateView = view.findViewById<TextView>(R.id.dialogue_date_picker)
             var date = LocalDate.now()
@@ -60,7 +59,6 @@ class RegisterHoursFragment : DialogFragment() {
                     startTime = LocalTime.of(hourOfDay, minutes)
                     startTimeView.text = startTime.toString()
                     numberView.setText(startTime.until(endTime, HOURS).toString())
-                    numberEdited = false
                 }, startTime.hour, startTime.minute, true).show()
             }
 
@@ -68,28 +66,28 @@ class RegisterHoursFragment : DialogFragment() {
             endTimeView.setOnClickListener {
                 TimePickerDialog(context, {_, hourOfDay, minutes ->
                     endTime = LocalTime.of(hourOfDay, minutes)
-                    endTimeView.text = startTime.toString()
+                    endTimeView.text = endTime.toString()
                     numberView.setText(startTime.until(endTime, HOURS).toString())
-                    numberEdited = false
                 }, endTime.hour, endTime.minute, true).show()
             }
 
-            numberView.setOnFocusChangeListener { _, _ -> numberEdited = true }
+            // number
+            numberView.setText(startTime.until(endTime, HOURS).toString())
+            // TODO: check if start_time + number <= max_day_time
+            // TODO: change to finish-text-change?
+            numberView.doAfterTextChanged { text ->
+                val number: Long = Integer.parseInt(text.toString()).toLong()
+                endTime = startTime.plusHours(number)
+                endTimeView.text = endTime.toString()
+            }
 
             builder.setView(view)
                 .setPositiveButton("Register") { _, _ ->
                     val weekday = WeekDayItem(date.dayOfWeek)
                     weekday.active = true
-                    if (numberEdited && numberView.text.toString() != "0") {
-                        weekday.startTime = LocalTime.of(8, 0)
-                        weekday.endTime = startTime.plusHours(
-                            Integer.parseInt(numberView.text.toString()).toLong()
-                        )
-                    } else {
-                        weekday.startTime = startTime
-                        weekday.endTime = endTime
-                    }
-
+                    weekday.date = date
+                    weekday.startTime = startTime
+                    weekday.endTime = endTime
                     listener?.onFinishDialog(weekday)
                     this.dismiss()
                 }

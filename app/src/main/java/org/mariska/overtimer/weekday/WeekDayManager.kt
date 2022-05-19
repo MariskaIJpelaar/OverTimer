@@ -36,6 +36,7 @@ class WeekDayManager(private var overTimerViewModel: OverTimerViewModel) {
     }
 
     fun addTime(item : WeekDayItem) {
+        // TODO: check if overtime goes correct
         val day = overTimerViewModel.getAllDays()[item.weekday]
         val currentOvertime: Int
         if (day != null && day.active) {
