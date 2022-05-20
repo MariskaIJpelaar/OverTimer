@@ -76,9 +76,11 @@ class RegisterHoursFragment : DialogFragment() {
             // TODO: check if start_time + number <= max_day_time
             // TODO: change to finish-text-change?
             numberView.doAfterTextChanged { text ->
-                val number: Long = Integer.parseInt(text.toString()).toLong()
-                endTime = startTime.plusHours(number)
-                endTimeView.text = endTime.toString()
+                if (text != null && text.toString() != "") {
+                    val number: Long = Integer.parseInt(text.toString()).toLong()
+                    endTime = startTime.plusHours(number)
+                    endTimeView.text = endTime.toString()
+                }
             }
 
             builder.setView(view)

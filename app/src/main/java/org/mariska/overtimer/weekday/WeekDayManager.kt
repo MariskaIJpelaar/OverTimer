@@ -36,15 +36,14 @@ class WeekDayManager(private var overTimerViewModel: OverTimerViewModel) {
     }
 
     fun addTime(item : WeekDayItem) {
-        // TODO: check if overtime goes correct
         val day = overTimerViewModel.getAllDays()[item.weekday]
         val currentOvertime: Int
         if (day != null && day.active) {
             val max = day.totalHours()
             val worked = item.totalHours()
 
-            currentOvertime = max(0, day.hoursWorked+worked - max)
-            if (day.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()) == weekOfYear)
+            currentOvertime = day.hoursWorked+worked - max
+            if (item.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()) == weekOfYear)
                 overTimerViewModel.update(day.weekday, min(max, day.hoursWorked + worked))
         } else {
             currentOvertime = item.totalHours()

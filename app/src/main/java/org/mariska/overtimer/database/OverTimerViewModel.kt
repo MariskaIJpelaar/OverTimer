@@ -3,12 +3,19 @@ package org.mariska.overtimer.database
 import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import org.mariska.overtimer.utils.LogItem
+import org.mariska.overtimer.utils.Logger
+import org.mariska.overtimer.utils.TimeRange
+import org.mariska.overtimer.utils.observeOnce
 import org.mariska.overtimer.weekday.WeekDayItem
 import java.lang.IllegalArgumentException
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.temporal.WeekFields
+import java.util.*
+import kotlin.math.min
 
+// TODO: convert all .values to observeOnces
 class OverTimerViewModel(private val repository: OverTimerRepository) : ViewModel() {
     val allLogs = repository.allLogs
     val allDays = repository.allDays
@@ -65,6 +72,31 @@ class OverTimerViewModel(private val repository: OverTimerRepository) : ViewMode
 
     fun clearThisWeek() = viewModelScope.launch {
         repository.clearThisWeek()
+    }
+
+    fun addTime(item: WeekDayItem, logger: Logger) = viewModelScope.launch {
+        val day = getAllDays()[item.weekday]
+        val currentOverTime: Int
+        if (day != null && day.active) {
+            val max = day.totalHours()
+            val worked = item.totalHours()
+
+            val range = repository.getHoursWorked(day.date).value
+
+        }
+//        val day = overTimerViewModel.getAllDays()[item.weekday]
+//        val currentOvertime: Int
+//        if (day != null && day.active) {
+//            val max = day.totalHours()
+//            val worked = item.totalHours()
+//
+//            currentOvertime = day.hoursWorked+worked - max
+//            if (item.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()) == weekOfYear)
+//                overTimerViewModel.update(day.weekday, min(max, day.hoursWorked + worked))
+//        } else {
+//            currentOvertime = item.totalHours()
+//        }
+//        logger.log(item.date, item.startTime, item.endTime, currentOvertime)
     }
 
 }

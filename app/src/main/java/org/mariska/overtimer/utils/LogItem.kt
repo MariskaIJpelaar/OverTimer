@@ -18,3 +18,10 @@ data class LogItem(
     @ColumnInfo(name="over_time")
     var overtime: Int = 0
 )
+
+data class TimeRange(
+    @ColumnInfo(name="start_time")
+    var startTime: LocalTime = LocalTime.now(),
+    @ColumnInfo(name="end_time")
+    var endTime: LocalTime = LocalTime.now()
+)

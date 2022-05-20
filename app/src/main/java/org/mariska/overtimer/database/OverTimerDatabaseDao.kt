@@ -3,8 +3,10 @@ package org.mariska.overtimer.database
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import org.mariska.overtimer.utils.LogItem
+import org.mariska.overtimer.utils.TimeRange
 import org.mariska.overtimer.weekday.WeekDayItemEntity
 import java.time.DayOfWeek
+import java.time.LocalDate
 
 @Dao
 interface OverTimerDatabaseDao {
@@ -29,4 +31,6 @@ interface OverTimerDatabaseDao {
     fun getAllActiveDays(): LiveData<List<WeekDayItemEntity>>
     @Query("SELECT SUM(over_time) FROM logged_times")
     fun getOvertime(): LiveData<Int>
+    @Query("SELECT start_time, end_time FROM logged_times WHERE day = :day")
+    fun getHoursWorked(day: LocalDate) : LiveData<TimeRange>
 }
