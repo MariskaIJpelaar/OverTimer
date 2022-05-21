@@ -15,7 +15,6 @@ import java.time.temporal.WeekFields
 import java.util.*
 import kotlin.math.min
 
-// TODO: convert all .values to observeOnces
 class OverTimerViewModel(private val repository: OverTimerRepository) : ViewModel() {
     val allLogs = repository.allLogs
     val allDays = repository.allDays
@@ -34,9 +33,8 @@ class OverTimerViewModel(private val repository: OverTimerRepository) : ViewMode
         item.totalHours()
     }}
 
-    fun getAllDays(): Map<DayOfWeek, WeekDayItem> {
-        val value = allDays.value ?: return emptyMap()
-        return value.map { day ->
+    val daysMap: LiveData<Map<DayOfWeek, WeekDayItem>> = Transformations.map(repository.allDays) { data ->
+        data.map { day ->
             val item = WeekDayItem(day.day)
             item.active = day.active
             item.date = day.date
@@ -74,31 +72,9 @@ class OverTimerViewModel(private val repository: OverTimerRepository) : ViewMode
         repository.clearThisWeek()
     }
 
-    fun addTime(item: WeekDayItem, logger: Logger) = viewModelScope.launch {
-        val day = getAllDays()[item.weekday]
-        val currentOverTime: Int
-        if (day != null && day.active) {
-            val max = day.totalHours()
-            val worked = item.totalHours()
-
-            val range = repository.getHoursWorked(day.date).value
-
-        }
-//        val day = overTimerViewModel.getAllDays()[item.weekday]
-//        val currentOvertime: Int
-//        if (day != null && day.active) {
-//            val max = day.totalHours()
-//            val worked = item.totalHours()
-//
-//            currentOvertime = day.hoursWorked+worked - max
-//            if (item.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()) == weekOfYear)
-//                overTimerViewModel.update(day.weekday, min(max, day.hoursWorked + worked))
-//        } else {
-//            currentOvertime = item.totalHours()
-//        }
-//        logger.log(item.date, item.startTime, item.endTime, currentOvertime)
+    suspend fun getHoursWorked(localDate: LocalDate) : LiveData<TimeRange> {
+        return repository.getHoursWorked(localDate)
     }
-
 }
 
 class OverTimerViewModelFactory(private val repository: OverTimerRepository) : ViewModelProvider.Factory {

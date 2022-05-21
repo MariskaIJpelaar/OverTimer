@@ -19,8 +19,6 @@ class OverTimerRepository(private val overTimerDatabaseDao: OverTimerDatabaseDao
     val allActiveDays = overTimerDatabaseDao.getAllActiveDays()
     val overtime = overTimerDatabaseDao.getOvertime()
 
-
-
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun insert(item: LogItem) {

@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
     // https://android-developers.googleblog.com/2012/05/using-dialogfragments.html
     override fun onFinishDialog(item : WeekDayItem) {
-        manager.addTime(item)
+        manager.addTime(this, item)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -123,7 +123,9 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_weekhours -> {
-            getContentWeekDays.launch(manager.getWeekdays())
+            manager.getWeekdays().observeOnce(this) { data ->
+                getContentWeekDays.launch(data.values.toTypedArray())
+            }
             true
         } R.id.action_export -> {
             // TODO: test
