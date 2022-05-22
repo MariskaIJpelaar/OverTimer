@@ -13,20 +13,22 @@ import java.util.*
 import kotlin.math.min
 import java.time.temporal.ChronoUnit.HOURS
 
-class WeekDayManager(private var overTimerViewModel: OverTimerViewModel) {
-    private var weekOfYear: Int = getWeekOfYear()
+class WeekDayManager(private var overTimerViewModel: OverTimerViewModel, private var lifecycleOwner: LifecycleOwner) {
+    private var weekOfYear: Int? = null
     private var logger: Logger = Logger(overTimerViewModel)
     init {
-        checkWeek()
+        getWeekOfYear()
     }
 
-    private fun getWeekOfYear() : Int {
+    private fun getWeekOfYear() {
         var value: Int = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
-        // TODO: convert to good type
-        overTimerViewModel.allActiveDays.value?.firstNotNullOf { item ->
-            value = item.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+        overTimerViewModel.allActiveDays.observeOnce(lifecycleOwner) { days ->
+            days.firstNotNullOfOrNull { item ->
+                value = item.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())
+            }
+            weekOfYear = value
+            checkWeek()
         }
-        return value
     }
 
     private fun checkWeek() {
@@ -41,7 +43,7 @@ class WeekDayManager(private var overTimerViewModel: OverTimerViewModel) {
         return overTimerViewModel.daysMap
     }
 
-    fun addTime(lifecycleOwner: LifecycleOwner, item : WeekDayItem) {
+    fun addTime(item : WeekDayItem) {
         overTimerViewModel.daysMap.observeOnce(lifecycleOwner) { data ->
             val day = data[item.weekday]
             if (day != null && day.active) {
@@ -49,10 +51,11 @@ class WeekDayManager(private var overTimerViewModel: OverTimerViewModel) {
                 val worked = item.totalHours()
                 runBlocking {
                     overTimerViewModel.getHoursWorked(day.date).observeOnce(lifecycleOwner) { range ->
-                        val currentOvertime = range.startTime.until(range.endTime, HOURS).toInt() + worked - max
+                        val current = range?.startTime?.until(range.endTime, HOURS)?.toInt() ?: 0;
+                        val currentOvertime = current + worked - max
                         if (item.date.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear()) == weekOfYear)
                             overTimerViewModel.update(day.weekday, min(max, day.hoursWorked + worked))
-                        logger.log(item.date, item.startTime, item.endTime, item.totalHours())
+                        logger.log(item.date, item.startTime, item.endTime, currentOvertime)
                     }
                 }
             } else {

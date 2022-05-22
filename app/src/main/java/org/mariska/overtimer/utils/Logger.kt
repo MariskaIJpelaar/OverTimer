@@ -23,9 +23,10 @@ class Logger(private val overTimerViewModel: OverTimerViewModel) {
         return format.format(logItem.day.toString(), logItem.startTime.toString(), logItem.endTime.toString(), logItem.overtime.toString())
     }
 
-    fun exportLogs( owner: LifecycleOwner, oStream: FileOutputStream) {
+    fun exportLogs( owner: LifecycleOwner, oStream: OutputStream) {
         val logWriter = ObjectOutputStream(oStream)
 
+        // TODO: move the observe to MainActivity
         overTimerViewModel.allLogs.observe(owner) { items ->
             items?.forEach { logWriter.writeUTF(toString(it)) }
             oStream.close()

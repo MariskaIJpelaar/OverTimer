@@ -2,6 +2,9 @@ package org.mariska.overtimer
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -12,8 +15,13 @@ import androidx.activity.result.launch
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.documentfile.provider.DocumentFile
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.room.Room
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.mariska.overtimer.database.*
 import org.mariska.overtimer.results.FileSelectContract
 import org.mariska.overtimer.results.WeekHoursContract
@@ -23,6 +31,7 @@ import org.mariska.overtimer.weekday.WeekDayItem
 import org.mariska.overtimer.weekday.WeekDayItemEntity
 import org.mariska.overtimer.weekday.WeekDayManager
 import java.io.*
+import java.lang.IllegalStateException
 import java.time.DayOfWeek
 
 class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDialogListener {
@@ -51,7 +60,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        manager = WeekDayManager(overTimeViewModel)
+        manager = WeekDayManager(overTimeViewModel, this)
         logger = Logger(overTimeViewModel)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar_main)
@@ -100,7 +109,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
 
     // https://android-developers.googleblog.com/2012/05/using-dialogfragments.html
     override fun onFinishDialog(item : WeekDayItem) {
-        manager.addTime(this, item)
+        manager.addTime(item)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -114,10 +123,21 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
         }
     }
 
+    //    https://commonsware.com/blog/2019/10/19/scoped-storage-stories-saf-basics.html
+    private suspend fun export(context: Context, source: Uri, lifecycleOwner: LifecycleOwner) = withContext(Dispatchers.IO) {
+        val resolver: ContentResolver = context.contentResolver
+        resolver.openOutputStream(source)?.use { stream ->
+            logger.exportLogs(lifecycleOwner, stream)
+        } ?: throw IllegalStateException("could not open $source")
+    }
+
     private val getSelectedFile = registerForActivityResult(FileSelectContract()) { result ->
         if (result != null) {
-            val ostream = FileOutputStream(result.path)
-            logger.exportLogs(this, ostream)
+            val me = this
+            runBlocking { export(me, result, me) }
+//            val file = DocumentFile.fromSingleUri(this, result)
+//            val ostream = FileOutputStream(file?.name)
+//            logger.exportLogs(this, ostream)
         }
     }
 
