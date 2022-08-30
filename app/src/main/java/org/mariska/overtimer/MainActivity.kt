@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import org.mariska.overtimer.database.*
 import org.mariska.overtimer.results.FileSelectContract
 import org.mariska.overtimer.results.WeekHoursContract
+import org.mariska.overtimer.utils.LogItem
 import org.mariska.overtimer.utils.Logger
 import org.mariska.overtimer.utils.observeOnce
 import org.mariska.overtimer.weekday.WeekDayItem
@@ -124,17 +125,19 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
     }
 
     //    https://commonsware.com/blog/2019/10/19/scoped-storage-stories-saf-basics.html
-    private suspend fun export(context: Context, source: Uri, lifecycleOwner: LifecycleOwner) = withContext(Dispatchers.IO) {
+    private suspend fun export(context: Context, source: Uri, items: List<LogItem>) = withContext(Dispatchers.IO) {
         val resolver: ContentResolver = context.contentResolver
         resolver.openOutputStream(source)?.use { stream ->
-            logger.exportLogs(lifecycleOwner, stream)
+            logger.exportLogs(stream, items)
         } ?: throw IllegalStateException("could not open $source")
     }
 
     private val getSelectedFile = registerForActivityResult(FileSelectContract()) { result ->
         if (result != null) {
-            val me = this
-            runBlocking { export(me, result, me) }
+            overTimeViewModel.allLogs.observeOnce(this) { items ->
+                val me = this
+                runBlocking { export(me, result, items) }
+            }
 //            val file = DocumentFile.fromSingleUri(this, result)
 //            val ostream = FileOutputStream(file?.name)
 //            logger.exportLogs(this, ostream)

@@ -1,6 +1,7 @@
 package org.mariska.overtimer.utils
 
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
@@ -12,7 +13,7 @@ import java.time.LocalTime
 
 class Logger(private val overTimerViewModel: OverTimerViewModel) {
     companion object {
-        private const val format: String = "%s %s-%s, overtime: %s"
+        private const val format: String = "%s %s-%s, overtime: %s\n"
     }
 
     fun log(date: LocalDate, start: LocalTime, end: LocalTime, overtime: Int) {
@@ -23,14 +24,9 @@ class Logger(private val overTimerViewModel: OverTimerViewModel) {
         return format.format(logItem.day.toString(), logItem.startTime.toString(), logItem.endTime.toString(), logItem.overtime.toString())
     }
 
-    fun exportLogs( owner: LifecycleOwner, oStream: OutputStream) {
+    fun exportLogs(oStream: OutputStream, items: List<LogItem>) {
         val logWriter = ObjectOutputStream(oStream)
-
-        // TODO: move the observe to MainActivity
-        overTimerViewModel.allLogs.observe(owner) { items ->
-            items?.forEach { logWriter.writeUTF(toString(it)) }
-            oStream.close()
-            logWriter.close()
-        }
+        items.forEach { logWriter.write(toString(it).toByteArray()) }
+        logWriter.close()
     }
 }
