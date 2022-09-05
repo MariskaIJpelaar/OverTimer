@@ -1,13 +1,7 @@
 package org.mariska.overtimer.utils
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
-import org.mariska.overtimer.database.OverTimerDatabaseDao
 import org.mariska.overtimer.database.OverTimerViewModel
-import java.io.*
+import java.io.OutputStream
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -25,8 +19,6 @@ class Logger(private val overTimerViewModel: OverTimerViewModel) {
     }
 
     fun exportLogs(oStream: OutputStream, items: List<LogItem>) {
-        val logWriter = ObjectOutputStream(oStream)
-        items.forEach { logWriter.write(toString(it).toByteArray()) }
-        logWriter.close()
+        items.forEach { oStream.write(toString(it).toByteArray(Charsets.UTF_8)) }
     }
 }

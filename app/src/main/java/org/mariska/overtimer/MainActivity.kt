@@ -124,10 +124,10 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
         }
     }
 
-    //    https://commonsware.com/blog/2019/10/19/scoped-storage-stories-saf-basics.html
+    // https://commonsware.com/blog/2019/10/19/scoped-storage-stories-saf-basics.html
     private suspend fun export(context: Context, source: Uri, items: List<LogItem>) = withContext(Dispatchers.IO) {
         val resolver: ContentResolver = context.contentResolver
-        resolver.openOutputStream(source)?.use { stream ->
+        resolver.openOutputStream(source, "w")?.use { stream ->
             logger.exportLogs(stream, items)
         } ?: throw IllegalStateException("could not open $source")
     }
@@ -138,9 +138,6 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
                 val me = this
                 runBlocking { export(me, result, items) }
             }
-//            val file = DocumentFile.fromSingleUri(this, result)
-//            val ostream = FileOutputStream(file?.name)
-//            logger.exportLogs(this, ostream)
         }
     }
 
@@ -151,8 +148,7 @@ class MainActivity : AppCompatActivity(), RegisterHoursFragment.RegisterHourDial
             }
             true
         } R.id.action_export -> {
-            // TODO: test
-//            https://stackoverflow.com/questions/49697630/open-file-choose-in-android-app-using-kotlin
+            // https://stackoverflow.com/questions/49697630/open-file-choose-in-android-app-using-kotlin
             getSelectedFile.launch()
             true
         } else -> {
